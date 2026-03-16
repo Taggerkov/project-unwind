@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="Debug_InputHistory" src="project://database/Assets/UI/Documents/Debug_InputHistory.uxml?fileID=9197481963319205126&amp;guid=20e6e48eb8757934ba85497d2b891dd5&amp;type=3#Debug_InputHistory"/>
+    <ui:Instance template="Debug_InputHistory" style="position: absolute; width: 100%; height: 100%;"/>
+</ui:UXML>

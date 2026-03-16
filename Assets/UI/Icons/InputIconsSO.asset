@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 247f8dffd5c17644695908c0207af635, type: 3}
+  m_Name: InputIconsSO
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Icons.InputIconsSo
+  directionalIcons:
+    _serializedList:
+    - Key: 3
+      Value: {fileID: 910988256, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 4
+      Value: {fileID: -134666634, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 5
+      Value: {fileID: 327143951, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 6
+      Value: {fileID: -1875354928, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 7
+      Value: {fileID: 865604287, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 8
+      Value: {fileID: -604695433, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 9
+      Value: {fileID: -1805077326, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 10
+      Value: {fileID: -2099454147, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+    - Key: 11
+      Value: {fileID: -2098022794, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+  lightAttack: {fileID: -1624530205, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+  mediumAttack: {fileID: -1399321263, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+  heavyAttack: {fileID: -719663447, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+  uniqueAttack: {fileID: -2088562975, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+  guard: {fileID: 1876911360, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
+  ability: {fileID: -142993424, guid: 2a2aa1f22fc860a4ea7266c19a6ad097, type: 3}
