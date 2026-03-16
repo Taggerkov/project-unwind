@@ -12,10 +12,10 @@ public static class GameInitializer
             Debug.LogError("GameInitializer: Could not find 'GlobalSystems' prefab in Resources!");
             return;
         }
-
+        
         GameObject instance = Object.Instantiate(prefab);
         instance.name = "[Global Systems]";
-
+        
         Object.DontDestroyOnLoad(instance);
     }
 }

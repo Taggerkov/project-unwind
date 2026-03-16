@@ -5,7 +5,7 @@ namespace FixedLogic
 {
     public class TickManager : MonoBehaviour
     {
-        public const int TickRate = 120; // Ticks per second
+        public const int TickRate = 60; // Ticks per second
         
         private float _accumulator = 0.0f;
         private const float TickInterval = 1.0f / TickRate;
@@ -26,34 +26,20 @@ namespace FixedLogic
                 _accumulator -= TickInterval;
             }
 
-            var alpha = _accumulator / TickInterval;
+            float alpha = _accumulator / TickInterval;
             foreach (var i in _interpolatables) i.Interpolate(alpha);
         }
 
         public void Register(object obj)
         {
-            switch (obj)
-            {
-                case ITickable t:
-                    _tickables.Add(t);
-                    break;
-                case IInterpolatable i:
-                    _interpolatables.Add(i);
-                    break;
-            }
+            if (obj is ITickable t) _tickables.Add(t);
+            if (obj is IInterpolatable i) _interpolatables.Add(i);
         }
 
         public void Unregister(object obj)
         {
-            switch (obj)
-            {
-                case ITickable t:
-                    _tickables.Remove(t);
-                    break;
-                case IInterpolatable i:
-                    _interpolatables.Remove(i);
-                    break;
-            }
+            if (obj is ITickable t) _tickables.Remove(t);
+            if (obj is IInterpolatable i) _interpolatables.Remove(i);
         }
     }
 }

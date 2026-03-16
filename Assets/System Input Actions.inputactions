@@ -337,17 +337,6 @@
                 },
                 {
                     "name": "",
-                    "id": "d5f0da70-878e-442a-85dd-5ff6fd175f75",
-                    "path": "<Linux::8BitDo::8BitDoUltimate2Wireless>/Y",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";ArcadeStick",
-                    "action": "UniqueAttack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "740d1228-3500-41ab-a24f-930f1053518a",
                     "path": "<Keyboard>/k",
                     "interactions": "",

@@ -4,11 +4,6 @@ using UnityEngine.InputSystem;
 
 namespace Systems.Input
 {
-    
-    /// <summary>
-    /// 
-    /// ...in a given frame.
-    /// </summary>
     public struct FrameInput
     {
         public int Direction; // 1-9
