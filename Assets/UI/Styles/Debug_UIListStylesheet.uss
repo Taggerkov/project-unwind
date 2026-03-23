@@ -1,0 +1,32 @@
+/* The Parent Row */
+#RowContainer {
+    flex-direction: row;
+    align-items: center; /* Keeps label and images aligned vertically */
+    margin-top: 10px; /* Space between rows */
+    margin-bottom: 10px;
+}
+
+/* The Label */
+#RowContainer > Label {
+    width: 60px; /* Adjust this based on your font size */
+    flex-shrink: 0;
+    margin-right: 10px;
+
+    /* Optional: Alignment */
+    -unity-text-align: middle-right; /* Keeps the number tucked against the images */
+}
+
+/* The Image Container */
+.input-icon-container {
+    flex-direction: row;
+    justify-content: flex-start; /* Keeps images flush */
+    flex-grow: 0;
+}
+
+/* The Images themselves */
+.input-icon {
+    width: 40px;
+    height: 40px;
+    flex-grow: 0;
+    flex-shrink: 0;
+}

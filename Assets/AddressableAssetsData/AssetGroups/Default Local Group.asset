@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Default Local Group
+  m_GUID: 2a7febe2f3a48ef44a1404a13bbe3fff
+  m_SerializeEntries:
+  - m_GUID: 1a1779c4626dd0345a58da7d56186180
+    m_Address: Assets/Systems/Combat/Combatant/Data/CombatantRedeemer/RedeemerSO.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4957af42e7e6cb84a85d47df9e874702
+    m_Address: Assets/Systems/Stage/Data/RuinedCathedral/RuinedCathedralScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9fcc9090f900324cb2f7dd9e5103249
+    m_Address: Assets/Systems/Combat/Combatant/Data/CombatantRedeemer/Redeemer_Prefab.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 4e602854eb5abe04cab3ba7e9406b755, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: b6b84c3028c667e4ea8a4fefe2f928f1, type: 2}
+    - {fileID: 11400000, guid: 02ece1e42a9160f42852f0aac75c2056, type: 2}

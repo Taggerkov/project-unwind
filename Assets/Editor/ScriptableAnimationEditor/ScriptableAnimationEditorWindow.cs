@@ -1,3 +1,4 @@
+using Systems.Combat.Combatant.Data;
 using Systems.Data;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -153,7 +154,7 @@ namespace Editor.ScriptableAnimationEditor
 
             if (previewedCombatantSo)
             {
-                _previewInstance = Instantiate(previewedCombatantSo.combatantPrefab);
+                // _previewInstance = Instantiate(previewedCombatantSo.combatantPrefab);
                 _previewRenderUtility.AddSingleGO(_previewInstance);
 
                 _previewInstance.transform.position = Vector3.zero;

@@ -1,6 +1,0 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
-        <ui:VisualElement name="Player0InputHistory" style="flex-grow: 1; position: absolute; background-color: rgba(0, 0, 0, 0.2); width: 10%; height: 100%;"/>
-        <ui:VisualElement name="Player1InputHistory" style="flex-grow: 1; position: absolute; background-color: rgba(0, 0, 0, 0.2); width: 10%; height: 100%; top: auto; left: 90%;"/>
-    </ui:VisualElement>
-</ui:UXML>

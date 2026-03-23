@@ -1,0 +1,32 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/UICharacterSelect.uss?fileID=7433441132597879392&amp;guid=23ee0080a6a486224924f334c58b6ebe&amp;type=3#UICharacterSelect"/>
+    <ui:VisualElement name="Menu">
+        <ui:Label text="Character Select&#10;" name="Title" display-tooltip-when-elided="false" triple-click-selects-line="false" double-click-selects-word="false"/>
+        <ui:VisualElement name="Body" style="flex-grow: 1; flex-direction: row;">
+            <ui:VisualElement name="Showcase-1" class="showcase">
+                <ui:VisualElement name="Preview-A" class="preview">
+                    <ui:Image source="project://database/Assets/image-387_1-3718648718.jpg?fileID=2800000&amp;guid=954a06c71505249ca907951cfdf30b66&amp;type=3#image-387_1-3718648718"/>
+                    <ui:Label text="X Combatant" name="CharNameA" class="showcase-label"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1; flex-wrap: nowrap; justify-content: center; align-items: center;">
+                    <ui:Label text="Ready!" name="StatusA" style="font-size: 70px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="SelectionWrapper" style="flex-grow: 1;">
+                <ui:VisualElement name="SelectionPane" style="flex-grow: 1;"/>
+                <ui:VisualElement name="UIToolTIps" style="flex-grow: 1; justify-content: center; align-items: center;">
+                    <ui:Label text="Press &apos;S3X&apos; to confirm!" style="-unity-text-align: upper-center; font-size: 50px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="Showcase-2" class="showcase">
+                <ui:VisualElement name="Preview-B" class="preview">
+                    <ui:Image source="project://database/Assets/image-387_1-3718648718.jpg?fileID=2800000&amp;guid=954a06c71505249ca907951cfdf30b66&amp;type=3#image-387_1-3718648718"/>
+                    <ui:Label text="X Combatant" name="CharNameB" class="showcase-label"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1; justify-content: center; align-self: center;">
+                    <ui:Label text="..." name="StatusB" style="font-size: 70px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

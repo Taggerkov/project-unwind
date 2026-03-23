@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Button name="" focusable="true" selectable="true" data-source-type="Systems.Combat.Combatant.Data.CombatantSelectionDataSO, Assembly-CSharp" class="btn-combatant-select">
+        <ui:Image>
+            <Bindings>
+                <ui:DataBinding property="source" data-source-path="combatantThumbnail" binding-mode="ToTarget"/>
+            </Bindings>
+        </ui:Image>
+        <ui:Label name="Label" class="btn-title">
+            <Bindings>
+                <ui:DataBinding property="text" data-source-path="combatantDisplayName" binding-mode="ToTarget"/>
+            </Bindings>
+        </ui:Label>
+    </ui:Button>
+</ui:UXML>

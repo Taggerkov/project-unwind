@@ -1,9 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="RowContainer" style="flex-direction: row; align-items: center; margin-bottom: 2px; height: 30px;">
-        <ui:Image name="DirectionIcon" style="width: 24px; height: 24px; margin-right: 5px;" />
-        
-        <ui:VisualElement name="ButtonContainer" style="flex-direction: row; flex-grow: 1;" />
-        
-        <ui:Label name="FrameCount" text="12" style="color: white; -unity-font-style: bold; font-size: 14px; margin-left: 10px;" />
-    </ui:VisualElement>
-</ui:UXML>

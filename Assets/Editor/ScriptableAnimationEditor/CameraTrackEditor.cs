@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Systems.Combat.Combatant.Data;
 using Systems.Data;
 using UnityEditor;
 using UnityEditor.UIElements;
