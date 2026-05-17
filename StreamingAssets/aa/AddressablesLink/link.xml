@@ -1,0 +1,87 @@
+<linker>
+  <assembly fullname="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KinematicCharacterController.KinematicCharacterMotor" preserve="all" />
+    <type fullname="Systems.Audio.AudioEvent" preserve="all" />
+    <type fullname="Systems.Audio.AudioSheetSO" preserve="all" />
+    <type fullname="Systems.Combat.Combatant.Animation.CombatantPoseCollection" preserve="all" />
+    <type fullname="Systems.Combat.Combatant.Animation.CombatantPoseSheet" preserve="all" />
+    <type fullname="Systems.Combat.Combatant.Animation.PoseAnimator" preserve="all" />
+    <type fullname="Systems.Combat.Combatant.Behaviour.CombatantBehaviour" preserve="all" />
+    <type fullname="Systems.Combat.Combatant.Behaviour.CombatantMoveSetDefinition" preserve="all" />
+    <type fullname="Systems.Combat.Combatant.Data.CombatantDataSO" preserve="all" />
+    <type fullname="Systems.Stage.CombatantSpawnMarker" preserve="all" />
+    <type fullname="Systems.Stage.StageEntrySO" preserve="all" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActBWalk" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActCrouch" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActCrouchToStand" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActFWalk" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActHitstun" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActHitstun/RedeemerCmnActBlockstun" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActJump" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActJumpLand" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActJumpPre" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActStand" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Common.RedeemerCmnActStandToCrouch" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RDRCombatantStats" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.Redeemer5AtkP" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerForwardRun" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerRekka1" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerRekka2" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerRekka3" preserve="nothing" serialized="true" />
+    <type fullname="Systems.Combat.Combatant.Behaviour.BoneData" preserve="nothing" serialized="true" />
+    <type fullname="Systems.Combat.Combatant.Behaviour.Pose" preserve="nothing" serialized="true" />
+    <type fullname="Systems.Combat.Combatant.Data.CombatantMoveList" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Reflex, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Reflex.Components.GameObjectSelfInjector" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.AddressableAssets.Addressables" preserve="all" />
+    <type fullname="UnityEngine.AddressableAssets.AssetReferenceGameObject" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.AddressableAssets.AssetReferenceT`1" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Rendering.Universal.UniversalAdditionalLightData" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AudioClip" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Cubemap" preserve="all" />
+    <type fullname="UnityEngine.GameObject" preserve="all" />
+    <type fullname="UnityEngine.Light" preserve="all" />
+    <type fullname="UnityEngine.LightmapSettings" preserve="all" />
+    <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.Mesh" preserve="all" />
+    <type fullname="UnityEngine.MeshFilter" preserve="all" />
+    <type fullname="UnityEngine.MeshRenderer" preserve="all" />
+    <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.RenderSettings" preserve="all" />
+    <type fullname="UnityEngine.Shader" preserve="all" />
+    <type fullname="UnityEngine.SkinnedMeshRenderer" preserve="all" />
+    <type fullname="UnityEngine.Texture2D" preserve="all" />
+    <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.RenderingLayerMask" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.BoxCollider" preserve="all" />
+    <type fullname="UnityEngine.CapsuleCollider" preserve="all" />
+  </assembly>
+  <assembly fullname="AYellowpaper.SerializedCollections">
+    <type fullname="AYellowpaper.SerializedCollections.SerializedDictionary`2" preserve="nothing" serialized="true" />
+    <type fullname="AYellowpaper.SerializedCollections.SerializedKeyValuePair`2" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Eflatun.SceneReference">
+    <type fullname="Eflatun.SceneReference.SceneReference" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.Mathematics">
+    <type fullname="Unity.Mathematics.float3" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Mathematics.Geometry.MinMaxAABB" preserve="nothing" serialized="true" />
+  </assembly>
+</linker>

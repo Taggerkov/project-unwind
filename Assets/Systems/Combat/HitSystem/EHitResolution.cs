@@ -1,4 +1,0 @@
-namespace Systems.Combat.HitSystem
-{
-    
-}
