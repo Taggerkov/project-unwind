@@ -9,6 +9,6 @@ namespace Systems.Common
         public AssetReferenceT<CombatantDataSO> Combatant0;
         public AssetReferenceT<CombatantDataSO> Combatant1;
 
-        public StageEntry Stage;
+        public AssetReferenceT<StageEntrySO> Stage;
     }
 }

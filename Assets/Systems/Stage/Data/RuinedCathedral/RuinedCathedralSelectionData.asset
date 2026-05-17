@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2638a3bd85c74524dafc693f04500aa3, type: 3}
+  m_Name: RuinedCathedralSelectionData
+  m_EditorClassIdentifier: Assembly-CSharp::StageSelectionDataSO
+  stageDisplayName: Ruined Cathedral
+  stageThumbnail: {fileID: 21300000, guid: 8dd9850d6be1c4a4d895c0d3575fcdad, type: 3}
+  stageEntryReference:
+    m_AssetGUID: 937ac79548416a74793f86131d1f7ae9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0

@@ -1,4 +1,3 @@
-using FixedLogic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -70,7 +69,6 @@ namespace Systems.Input
         public PlayerInputProvider(PlayerInput playerInput)
         {
             _pi = playerInput;
-            Buffer = new InputBuffer();
 
             PlayerId = playerInput.playerIndex;
             DeviceName = playerInput.devices.Count > 0 ? playerInput.devices[0].displayName : "Unknown";
@@ -108,46 +106,25 @@ namespace Systems.Input
             };
         }
 
-        public void InputTick()
-        {
-            // 1. Resolve Direction
-            int direction = InputUtils.VectorToNumpad(_latchedDirection);
-            if (direction == 5)
-                direction = InputUtils.VectorToNumpad(_directionalInputAction.ReadValue<Vector2>());
-
-            // 2. Build the FrameInput snapshot
-            TickInput currentTick = new TickInput
-            {
-                Direction = InputUtils.NumpadToInputType(direction),
-                LightAttack = _lightAttackButtonTracker.GetStateAndStep(),
-                MediumAttack = _mediumAttackButtonTracker.GetStateAndStep(),
-                HeavyAttack = _heavyAttackButtonTracker.GetStateAndStep(),
-                UniqueAttack = _uniqueAttackButtonTracker.GetStateAndStep(),
-                GuardButton = _guardButtonTracker.GetStateAndStep(),
-                AbilityButton = _abilityButtonTracker.GetStateAndStep()
-            };
-
-            Buffer.Write(currentTick);
-
-            OnNewFrame?.Invoke(currentTick);
-
-            _latchedDirection = Vector2.zero; // Clear latched direction after processing
-        }
-
         public EInputProviderType ProviderType => EInputProviderType.Player;
-        public InputBuffer Buffer { get; }
+        public InputBuffer Buffer { get; } = new();
 
         public TickInput UpdateFrameInput()
         {
-            // 1. Resolve Direction
             int direction = InputUtils.VectorToNumpad(_latchedDirection);
-            if (direction == 5)
+            if (direction == 0)
                 direction = InputUtils.VectorToNumpad(_directionalInputAction.ReadValue<Vector2>());
 
-            // 2. Build the FrameInput snapshot
+            var currentDirection = InputUtils.NumpadToInputType(direction);
+            var previousDirection = Buffer.GetFrame(0).Direction.Current;
+
             TickInput currentTick = new TickInput
             {
-                Direction = InputUtils.NumpadToInputType(direction),
+                Direction = new DirectionState
+                {
+                    Current = currentDirection,
+                    Previous = previousDirection
+                },
                 LightAttack = _lightAttackButtonTracker.GetStateAndStep(),
                 MediumAttack = _mediumAttackButtonTracker.GetStateAndStep(),
                 HeavyAttack = _heavyAttackButtonTracker.GetStateAndStep(),
@@ -157,9 +134,7 @@ namespace Systems.Input
             };
 
             Buffer.Write(currentTick);
-
-            _latchedDirection = Vector2.zero; // Clear latched direction after processing
-
+            _latchedDirection = Vector2.zero;
             return currentTick;
         }
     }

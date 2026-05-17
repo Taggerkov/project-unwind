@@ -1,2 +1,18 @@
 fileFormatVersion: 2
 guid: 132259e07c102664c8f9e48f04080b42
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - audioEvent: {instanceID: 0}
+  - <Motor>k__BackingField: {instanceID: 0}
+  - <Animator>k__BackingField: {instanceID: 0}
+  - combatantMoveSetDefinition: {instanceID: 0}
+  - combatantPoseSheet: {instanceID: 0}
+  - visualRoot: {instanceID: 0}
+  - directionIndicatorRoot: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

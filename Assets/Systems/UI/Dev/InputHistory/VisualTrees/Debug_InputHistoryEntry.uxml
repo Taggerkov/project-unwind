@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/Debug_UIListStylesheet.uss?fileID=7433441132597879392&amp;guid=3113ea377a9e81a4db4222615c149ad8&amp;type=3#Debug_UIListStylesheet"/>
+    <ui:VisualElement name="RowContainer" style="flex-direction: row; align-items: center; margin-bottom: 2px; height: 30px;">
+        <ui:Label name="FrameCount" text="12" style="-unity-font-definition: url(&quot;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2230732570650464555&amp;guid=d7b4457554645a94a954a0d2c4bcb5c4&amp;type=3#NotInter-Regular&quot;); font-size: 24px; color: rgb(255, 255, 255); -unity-text-outline-color: rgb(0, 0, 0); -unity-text-outline-width: 1.2px;"/>
+        <ui:VisualElement name="ButtonContainer" class="input-icon-container"/>
+    </ui:VisualElement>
+</ui:UXML>

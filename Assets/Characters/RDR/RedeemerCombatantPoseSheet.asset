@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aff78b0ba971be408988e5636b7e63d, type: 3}
+  m_Name: RedeemerCombatantPoseSheet
+  m_EditorClassIdentifier: Assembly-CSharp::CombatantPoseSheet
+  _poses:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 11400000, guid: 7475fe751246ab14dac9c263cf80742d, type: 2}
+    - Key: 1
+      Value: {fileID: 11400000, guid: c67eb8da06efadf46812283c903bc5e8, type: 2}
+    - Key: 4
+      Value: {fileID: 11400000, guid: 678546e3eb88dd6448ab91b97d099e7c, type: 2}
+    - Key: 50
+      Value: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
+    - Key: 55
+      Value: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}
+    - Key: 2
+      Value: {fileID: 11400000, guid: 1c48ab86d3d3d0e40ab697f6c2416531, type: 2}
+  _level1DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
+  _level2DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
+  _level3DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
+  _level4DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
+  _level5DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
+  _level1BlockPoses: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}
+  _level2BlockPoses: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}
+  _level3BlockPoses: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}
+  _level4BlockPoses: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}
+  _level5BlockPoses: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}

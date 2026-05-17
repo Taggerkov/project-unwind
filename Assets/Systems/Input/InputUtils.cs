@@ -1,11 +1,9 @@
-using Systems.Combat.Core.Input;
 using UnityEngine;
 
 namespace Systems.Input
 {
     public static class InputUtils
     {
-        
         public class CompressedInput
         {
             public TickInput TickData;
@@ -19,8 +17,13 @@ namespace Systems.Input
 
             public bool Matches(TickInput other)
             {
+                // if (TickData.Direction.Current != other.Direction.Current)
+                // {
+                //     Debug.Log($"Direction changed from {TickData.Direction.Current} to {other.Direction.Current}");
+                // }
+
                 // If the direction or ANY button state differs, it's a new input
-                return TickData.Direction == other.Direction &&
+                return TickData.Direction.Current == other.Direction.Current &&
                        TickData.LightAttack.Held == other.LightAttack.Held &&
                        TickData.MediumAttack.Held == other.MediumAttack.Held &&
                        TickData.HeavyAttack.Held == other.HeavyAttack.Held &&
@@ -29,14 +32,14 @@ namespace Systems.Input
                        TickData.AbilityButton.Held == other.AbilityButton.Held;
             }
         }
-        
+
         public static int VectorToNumpad(Vector2 dir)
         {
             // Use a small deadzone to avoid "floating" stick noise
             int x = dir.x > 0.3f ? 1 : (dir.x < -0.3f ? -1 : 0);
             int y = dir.y > 0.3f ? 1 : (dir.y < -0.3f ? -1 : 0);
 
-            if (x == 0 && y == 0) return 5; // Neutral
+            if (x == 0 && y == 0) return 0; // Neutral
             if (x == -1 && y == -1) return 1;
             if (x == 0 && y == -1) return 2;
             if (x == 1 && y == -1) return 3;
@@ -48,21 +51,20 @@ namespace Systems.Input
 
             return 5;
         }
-        
-        public static EInputType NumpadToInputType(int numpad)
+
+        public static EDirectionInput NumpadToInputType(int numpad)
         {
             return numpad switch
             {
-                1 => EInputType.Input1,
-                2 => EInputType.Input2,
-                3 => EInputType.Input3,
-                4 => EInputType.Input4,
-                5 => EInputType.Input5,
-                6 => EInputType.Input6,
-                7 => EInputType.Input7,
-                8 => EInputType.Input8,
-                9 => EInputType.Input9,
-                _ => EInputType.Input5 // Default to neutral if something goes wrong
+                1 => EDirectionInput.Input1,
+                2 => EDirectionInput.Input2,
+                3 => EDirectionInput.Input3,
+                4 => EDirectionInput.Input4,
+                6 => EDirectionInput.Input6,
+                7 => EDirectionInput.Input7,
+                8 => EDirectionInput.Input8,
+                9 => EDirectionInput.Input9,
+                _ => EDirectionInput.None // covers 5 and any bad input
             };
         }
     }

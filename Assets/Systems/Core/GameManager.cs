@@ -1,42 +1,58 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using KinematicCharacterController;
-using Reflex.Attributes;
 using Systems.AsyncLoading;
 using Systems.Combat;
+using Systems.Combat.Combatant.Data;
 using Systems.Common;
 using Systems.Input;
+using Systems.UI.CombatantSelect;
 using UnityEngine;
+using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace Systems.Core
 {
+    public enum GameState
+    {
+        MainMenu,
+        CharacterSelect,
+        Combat
+    }
+
     public class GameManager : IDisposable
     {
         private readonly KCCSettings _kccSettings;
 
-        private readonly CharacterSelectManager _characterSelectManager;
+        private readonly CombatantSelectManager _combatantSelectManager;
         private readonly CombatManager _combatManager;
 
         private readonly PlayerRegistry _playerRegistry;
 
         private readonly AsyncLoader _asyncLoader;
 
-        public GameManager(KCCSettings kccSettings, CharacterSelectManager characterSelectManager, CombatManager combatManager,
+        public event Action<GameState> OnGameStateChanged;
+
+        public GameState CurrentGameState { get; private set; }
+
+
+        public GameManager(KCCSettings kccSettings, CombatantSelectManager combatantSelectManager,
+            CombatManager combatManager,
             PlayerRegistry playerRegistry, AsyncLoader asyncLoader)
         {
             _kccSettings = kccSettings;
-            _characterSelectManager = characterSelectManager;
+            _combatantSelectManager = combatantSelectManager;
             _combatManager = combatManager;
             _playerRegistry = playerRegistry;
             _asyncLoader = asyncLoader;
-            
+
+            Debug.Log(UnityEditor.AssetDatabase.AssetPathToGUID("Assets/Systems/Audio/Test/AE_MetalSwingT.asset"));
             KinematicCharacterSystem.Settings = _kccSettings;
-            _characterSelectManager.OnEncounterReady += HandleEncounterReady;
         }
 
         public void Dispose()
         {
-            _characterSelectManager.OnEncounterReady -= HandleEncounterReady;
+            // _characterSelectManager.OnEncounterReady -= HandleEncounterReady;
             Debug.Log("GameManager: Dispose()");
         }
 
@@ -44,6 +60,8 @@ namespace Systems.Core
         {
             try
             {
+                _combatantSelectManager.OnEncounterReady -= HandleEncounterReady;
+
                 var linkerList = GetAllPlayers();
 
                 IInputProvider combatant0InputProvider = null;
@@ -66,22 +84,25 @@ namespace Systems.Core
 
                 Debug.Log("Loading Started...");
 
-                var (p0Data, p1Data) = await _asyncLoader.LoadCombatantData(combatEncounterData);
+                var (stageData, combatantTuple) = await UniTask.WhenAll(
+                    _asyncLoader.LoadStageData(combatEncounterData),
+                    _asyncLoader.LoadCombatantData(combatEncounterData)
+                );
 
-                await _asyncLoader.LoadBattleAssets(combatEncounterData.Stage, p0Data, p1Data);
+                var (p0Data, p1Data) = combatantTuple;
+
+                var sceneInstance = await _asyncLoader.LoadBattleAssets(stageData, p0Data, p1Data);
 
                 Debug.Log("Loading Completed!");
 
-
-                _combatManager.SetCombatants(p0Data, p1Data);
-                _combatManager.SetInputProviders(combatant0InputProvider, combatant1InputProvider);
-                _combatManager.StartCombat();
+                await BeginCombat(sceneInstance, p0Data, p1Data, combatant0InputProvider, combatant1InputProvider);
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error during encounter setup: {e}");
             }
         }
+
 
         private List<PlayerLinker> GetAllPlayers()
         {
@@ -90,7 +111,25 @@ namespace Systems.Core
 
         public void BeginCharacterSelect()
         {
-            _characterSelectManager.BeginCharacterSelection();
+            CurrentGameState = GameState.CharacterSelect;
+            OnGameStateChanged?.Invoke(CurrentGameState);
+
+            _combatantSelectManager.Begin();
+            _combatantSelectManager.OnEncounterReady += HandleEncounterReady;
+        }
+
+        public async UniTask BeginCombat(SceneInstance sceneInstance, CombatantDataSO combatant0Data,
+            CombatantDataSO combatant1Data,
+            IInputProvider combatant0InputProvider, IInputProvider combatant1InputProvider)
+        {
+            await _combatManager.PrepareCombat(sceneInstance, combatant0Data, combatant0InputProvider, combatant1Data,
+                combatant1InputProvider);
+
+
+            CurrentGameState = GameState.Combat;
+            OnGameStateChanged?.Invoke(CurrentGameState);
+
+            _combatManager.StartCombat();
         }
     }
 }

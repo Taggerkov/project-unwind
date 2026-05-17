@@ -38,7 +38,7 @@ namespace Systems.Core
 
         private void HandlePlayerJoined(PlayerInput playerInput)
         {
-            Debug.Log($"Player {playerInput.playerIndex + 1} Joined!");
+            Debug.Log($"Player {playerInput.playerIndex} Joined!");
             
             var linker = playerInput.GetComponent<PlayerLinker>();
             
@@ -47,8 +47,6 @@ namespace Systems.Core
                 Debug.LogError("PlayerRegistry: PlayerInput does not have a PlayerLinker component!");
                 return;
             }
-
-            linker.Setup(playerInput);
             
             if (playerInput.playerIndex == 0)
             {

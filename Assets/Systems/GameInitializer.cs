@@ -1,13 +1,12 @@
-using System;
 using Reflex.Core;
-using Reflex.Enums;
 using Reflex.Injectors;
 using Systems.Core;
+using Systems.UI.CombatantSelect;
+using Systems.UI.Dev.CollisionVisualizer;
+using Systems.UI.Dev.InputHistory.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
-using Resolution = Reflex.Enums.Resolution;
 
 namespace Systems
 {
@@ -37,7 +36,11 @@ namespace Systems
 
             //Expected GlobalSystems structure:
             // - GlobalSystems (TickManager, PlayerInputManager, KinematicCharacterSystem)
-            //   - CharacterSelect (UIDocument)
+            //   - CharacterSelect
+            //     - Canvas (Canvas)
+            //     - Combat
+            //      - DebugInformation
+            //          - InputHistoryVisualizer (UIDocument, InputHistoryUIList)
 
             var tickManager = instance.GetComponent<TickManager>();
             if (!tickManager)
@@ -54,32 +57,45 @@ namespace Systems
                 return;
             }
 
-            var document = instance.transform.Find("CharacterSelect")?.GetComponent<UIDocument>();
+            var canvas = instance.transform.Find("CharacterSelect/Canvas")?.GetComponent<Canvas>();
 
-            if (!document)
+            if (!canvas)
             {
                 Debug.LogError(
-                    "GameInitializer: UIDocument component not found on CharacterSelect child of GlobalSystems prefab!");
+                    "GameInitializer: Canvas component not found at 'CharacterSelect/Canvas' in GlobalSystems prefab!");
                 return;
             }
 
+            var inputHistoryUIList = instance.transform.Find("Combat/DebugInformation/InputHistoryVisualizer")
+                ?.GetComponent<InputHistoryUIList>();
+
+            if (!inputHistoryUIList)
+            {
+                Debug.LogError(
+                    "GameInitializer: InputHistoryUIList component not found at 'Combat/InputHistoryVisualizer' in GlobalSystems prefab!");
+                return;
+            }
+
+            var collisionVisualizer = instance.transform.Find("Combat/DebugInformation/CollisionVisualizer")
+                ?.GetComponent<CollisionVisualizer>();
+
+            containerBuilder.RegisterValue(tickManager);
+            containerBuilder.RegisterValue(new CharacterSelectCanvas(canvas));
             containerBuilder.RegisterValue(playerInputManager);
-            containerBuilder.RegisterValue(document);
 
-            containerBuilder.RegisterType(typeof(PlayerRegistry), new[] { typeof(PlayerRegistry), typeof(IDisposable) },
-                Lifetime.Singleton, Resolution.Eager);
+            containerBuilder.RegisterValue(inputHistoryUIList);
+            containerBuilder.RegisterValue(collisionVisualizer);
 
-            containerBuilder.RegisterType(typeof(CharacterSelectManager),
-                new[] { typeof(CharacterSelectManager), typeof(IDisposable) },
-                Lifetime.Singleton, Resolution.Eager);
-
-            containerBuilder.OnContainerBuilt += (container) => PostBuildInjection(tickManager, container);
+            containerBuilder.OnContainerBuilt +=
+                container => PostBuildInjection(tickManager, inputHistoryUIList, container);
         }
 
-        private static void PostBuildInjection(TickManager tickManager, Container container)
+        private static void PostBuildInjection(TickManager tickManager, InputHistoryUIList inputHistoryUIList,
+            Container container)
         {
             Debug.Log("GameInitializer: Performing post-build injection...");
             AttributeInjector.Inject(tickManager, container);
+            AttributeInjector.Inject(inputHistoryUIList, container);
         }
     }
 }

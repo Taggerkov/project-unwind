@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Music
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Music
+  m_GUID: 954a52100fdbe0085ac25357bd75e5bf
+  m_SerializeEntries:
+  - m_GUID: 32413db5677e6c242b315269d00a6ade
+    m_Address: Assets/Audio/GameTheme5.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5450658d027ea5f99802af26d5366e76
+    m_Address: Assets/Audio/GameTheme1.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65824ae39421824b198d6c1f9f1bdd3a
+    m_Address: Assets/Audio/GameTheme3.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 693c71e257c6f9b57ba5f95e18821ed3
+    m_Address: Assets/Audio/MenuTheme1.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ce32ff00fbb9d74aa72694feee4e30a
+    m_Address: Assets/Audio/GameTheme2.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4bd42cbbdc2a6847937baf82e947b1c
+    m_Address: Assets/Audio/GameTheme4.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 4e602854eb5abe04cab3ba7e9406b755, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: c6daedc40c72afc5cac98b8a57e3d62f, type: 2}
+    - {fileID: 11400000, guid: 5d7623912d4d50b5c9a00bf409b691ce, type: 2}

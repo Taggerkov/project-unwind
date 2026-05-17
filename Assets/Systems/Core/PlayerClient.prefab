@@ -145,6 +145,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bf6a2c6b4ef654e8e37b2a797d5c8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Systems.Input.PlayerLinker
+  playerInput: {fileID: 4538629520506308624}
+  multiplayerEventSystem: {fileID: -5636014826215219715}
+  inputSystemUIInputModule: {fileID: -5797807189063907471}
 --- !u!114 &-5636014826215219715
 MonoBehaviour:
   m_ObjectHideFlags: 0

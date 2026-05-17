@@ -1,2 +1,13 @@
 fileFormatVersion: 2
 guid: f5cde3e815f5e9744ae79e4d25253359
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - kccSettings: {fileID: 11400000, guid: 4aeca62f28cd9924a83b520ff9fd4b72, type: 2}
+  - audioSettings: {fileID: 11400000, guid: c541f661327e8be8580c5cf9922c517e, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

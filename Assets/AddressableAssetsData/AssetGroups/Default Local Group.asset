@@ -25,8 +25,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9fcc9090f900324cb2f7dd9e5103249
-    m_Address: Assets/Systems/Combat/Combatant/Data/CombatantRedeemer/Redeemer_Prefab.prefab
+  - m_GUID: 69ff5439f33bad74d816a11362640e63
+    m_Address: Assets/Characters/RDR/RDR_Prefab.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 937ac79548416a74793f86131d1f7ae9
+    m_Address: Assets/Systems/Stage/Data/RuinedCathedral/RuinedCathedralStageEntry.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
