@@ -1,8 +1,7 @@
 <linker>
   <assembly fullname="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-    <type fullname="KinematicCharacterController.KinematicCharacterMotor" preserve="all" />
-    <type fullname="Systems.Audio.AudioEvent" preserve="all" />
-    <type fullname="Systems.Audio.AudioSheetSO" preserve="all" />
+    <type fullname="Systems.Audio.AudioSheet" preserve="all" />
+    <type fullname="Systems.Audio.Shared.AudioEvent" preserve="all" />
     <type fullname="Systems.Combat.Combatant.Animation.CombatantPoseCollection" preserve="all" />
     <type fullname="Systems.Combat.Combatant.Animation.CombatantPoseSheet" preserve="all" />
     <type fullname="Systems.Combat.Combatant.Animation.PoseAnimator" preserve="all" />
@@ -24,6 +23,9 @@
     <type fullname="Characters.RDR.Common.RedeemerCmnActStandToCrouch" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.RDRCombatantStats" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.Redeemer5AtkP" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerAirBDash" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerAirFDash" preserve="nothing" serialized="true" />
+    <type fullname="Characters.RDR.RedeemerBDash" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.RedeemerForwardRun" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.RedeemerRekka1" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.RedeemerRekka2" preserve="nothing" serialized="true" />
@@ -31,6 +33,9 @@
     <type fullname="Systems.Combat.Combatant.Behaviour.BoneData" preserve="nothing" serialized="true" />
     <type fullname="Systems.Combat.Combatant.Behaviour.Pose" preserve="nothing" serialized="true" />
     <type fullname="Systems.Combat.Combatant.Data.CombatantMoveList" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KinematicCharacterController.KinematicCharacterMotor" preserve="all" />
   </assembly>
   <assembly fullname="Reflex, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="Reflex.Components.GameObjectSelfInjector" preserve="all" />
