@@ -64,12 +64,6 @@ System.ComponentModel.Annotations, System.Threading.Channels.
 
 <!-- TODO: list Project Unwind's own third-party assets and any tutorials followed. -->
 
-## Acknowledgements
-
-- An indie-developer friend, for early design callouts and for help studying how Arc System Works structure their
-  fighters.
-- Arc System Works, as the design and aesthetic reference for the project.
-
 ## Roll-a-Ball Demo
 
 Blog 1 documents a different, self-contained demo project built earlier in the course. It lives in its own repository,
