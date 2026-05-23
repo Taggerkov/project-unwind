@@ -8,6 +8,9 @@
     <type fullname="Systems.Combat.Combatant.Behaviour.CombatantBehaviour" preserve="all" />
     <type fullname="Systems.Combat.Combatant.Behaviour.CombatantMoveSetDefinition" preserve="all" />
     <type fullname="Systems.Combat.Combatant.Data.CombatantDataSO" preserve="all" />
+    <type fullname="Systems.CPU.CpuDefenceHintSheet" preserve="all" />
+    <type fullname="Systems.CPU.CpuMoveHintSheet" preserve="all" />
+    <type fullname="Systems.CPU.CpuPersonality" preserve="all" />
     <type fullname="Systems.Stage.CombatantSpawnMarker" preserve="all" />
     <type fullname="Systems.Stage.StageEntrySO" preserve="all" />
     <type fullname="Characters.RDR.Common.RedeemerCmnActBWalk" preserve="nothing" serialized="true" />
@@ -30,6 +33,8 @@
     <type fullname="Characters.RDR.RedeemerRekka1" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.RedeemerRekka2" preserve="nothing" serialized="true" />
     <type fullname="Characters.RDR.RedeemerRekka3" preserve="nothing" serialized="true" />
+    <type fullname="Systems.CPU.CpuDefenceHintEntry" preserve="nothing" serialized="true" />
+    <type fullname="Systems.CPU.CpuMoveHintEntry" preserve="nothing" serialized="true" />
     <type fullname="Systems.Combat.Combatant.Behaviour.BoneData" preserve="nothing" serialized="true" />
     <type fullname="Systems.Combat.Combatant.Behaviour.Pose" preserve="nothing" serialized="true" />
     <type fullname="Systems.Combat.Combatant.Data.CombatantMoveList" preserve="nothing" serialized="true" />
