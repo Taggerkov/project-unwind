@@ -2,166 +2,194 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Reflex.Attributes;
 using Reflex.Core;
 using Reflex.Injectors;
 using Systems.Audio.Contracts;
+using Systems.Audio.Music;
+using Systems.Audio.Shared;
+using Systems.Audio.Voiceline;
 using UnityEditor;
 using UnityEngine;
 
 namespace Systems.Audio.Editor
 {
     /// <summary>
-    /// Editor window for runtime <see cref="AudioManager"/> inspection and control.
-    /// Resolves its <see cref="AudioManager"/> dependency from the Reflex root container on play mode
-    /// entry, mirroring the injection pattern used by other editor tools in the project.
-    /// Per-category volumes and speeds are tracked locally and reset to 1 each time play mode is
-    /// entered — they are never read back from the backend.
-    /// Open via Unwind → Audio → Manager.
+    /// Runtime control centre for the audio system. Inspects and drives the <see cref="AudioManager"/>,
+    /// <see cref="MusicManager"/>, and <see cref="VoicelineManager"/>, surfaces backend diagnostics, and
+    /// auditions audio assets. Dependencies are resolved from the Reflex root container on play mode entry.
+    /// Open via Unwind, Audio, Manager.
     /// </summary>
     public sealed class AudioManagerWindow : EditorWindow
     {
-        private enum Tab { Home, Live, Settings }
+        /// <summary>Identifies which tab is currently active in the window toolbar.</summary>
+        private enum Tab
+        {
+            /// <summary>Configuration readout and backend diagnostics.</summary>
+            Home,
+            /// <summary>Live playback handles with per-handle controls.</summary>
+            Live,
+            /// <summary>Playlist transport and music volume control.</summary>
+            Music,
+            /// <summary>Voiceline queue, transport, and volume control.</summary>
+            Voice,
+            /// <summary>Per-category volume, speed, mute, and bulk actions.</summary>
+            Settings,
+            /// <summary>Preview playback of AudioEvent and AudioSheet assets.</summary>
+            Audition
+        }
 
-        private static readonly string[] TabLabels = { "Home", "Live", "Settings" };
+        /// <summary>Display strings for the tab toolbar, ordered to match <see cref="Tab"/>.</summary>
+        private static readonly string[] TabLabels = { "Home", "Live", "Music", "Voice", "Settings", "Audition" };
+
+        /// <summary>SessionState key under which the active tab persists across domain reloads.</summary>
+        private const string TabStateKey = "Unwind.AudioWindow.Tab";
+
+        /// <summary>Semi-transparent grey used to draw 1 px horizontal separator lines.</summary>
         private static readonly Color SeparatorColor = new(0.5f, 0.5f, 0.5f, 0.5f);
 
-        /// <summary>
-        /// Resolved from the Reflex root container on play mode entry. Null outside play mode.
-        /// </summary>
+        /// <summary>Resolved from the Reflex root container on play mode entry. Null outside play mode.</summary>
         [Inject] private AudioManager _audioManager;
 
-        /// <summary>
-        /// True once <see cref="Inject"/> has successfully resolved dependencies from the container.
-        /// Guards all play-mode-only GUI paths against accessing a null manager.
-        /// </summary>
+        /// <summary>Resolved from the Reflex root container on play mode entry. Null outside play mode.</summary>
+        [Inject] private MusicManager _musicManager;
+
+        /// <summary>Resolved from the Reflex root container on play mode entry. Null outside play mode.</summary>
+        [Inject] private VoicelineManager _voicelineManager;
+
+        /// <summary>True once <see cref="Inject"/> has resolved dependencies. Guards play-mode-only paths.</summary>
         private bool _injected;
 
-        /// <summary>
-        /// Loaded from the project via <see cref="AssetDatabase"/> in <see cref="OnEnable"/>.
-        /// Available in both edit and play mode, so the Home tab always renders.
-        /// </summary>
-        private AudioSettings _audioSettings;
+        /// <summary>True while a per-frame repaint is subscribed, so play mode meters update smoothly.</summary>
+        private bool _repainting;
 
+        /// <summary>Loaded from the project via <see cref="AssetDatabase"/> so the Home tab renders in edit mode.</summary>
+        private Shared.AudioSettings _audioSettings;
+
+        /// <summary>The tab currently selected in the toolbar.</summary>
         private Tab _currentTab = Tab.Live;
 
         /// <summary>Scroll state for the Live tab handle list.</summary>
         private Vector2 _scrollPosition;
 
-        /// <summary>
-        /// Per-handle volume overrides keyed by UUID. Entries are added at 1 on first encounter
-        /// and removed when the UUID leaves <see cref="AudioManager.ActiveUuids"/>.
-        /// </summary>
-        private readonly Dictionary<Guid, float> _handleVolumes = new();
+        /// <summary>Case-insensitive name filter for the Live tab.</summary>
+        private string _handleSearch = string.Empty;
 
-        /// <summary>
-        /// Per-handle speed overrides keyed by UUID. Lifecycle mirrors <see cref="_handleVolumes"/>.
-        /// </summary>
-        private readonly Dictionary<Guid, float> _handleSpeeds = new();
+        /// <summary>Pre-mute category volumes, keyed by the categories currently muted from this window.</summary>
+        private readonly Dictionary<AudioCategory, float> _mutedVolumes = new();
 
-        /// <summary>
-        /// Master volume per <see cref="AudioCategory"/>, tracked locally.
-        /// Initialised to 1 on play mode entry and pushed to <see cref="AudioManager"/> on change.
-        /// </summary>
-        private readonly Dictionary<AudioCategory, float> _categoryVolumes = new();
+        /// <summary>Fade target and duration for the Music tab fade control.</summary>
+        private float _musicFadeTarget = 1f, _musicFadeDuration = 1f;
 
-        /// <summary>
-        /// Master speed per <see cref="AudioCategory"/>, tracked locally.
-        /// Lifecycle and intent mirror <see cref="_categoryVolumes"/>.
-        /// </summary>
-        private readonly Dictionary<AudioCategory, float> _categorySpeeds = new();
+        /// <summary>Fade target and duration for the Voice tab fade control.</summary>
+        private float _voiceFadeTarget = 1f, _voiceFadeDuration = 1f;
 
-        /// <summary>Opens the Audio Manager window via the Unity menu.</summary>
+        /// <summary>The asset selected for AudioEvent audition, and the UUID of the last audition started.</summary>
+        private AudioEvent _auditionEvent;
+        private Guid _auditionId;
+
+        /// <summary>Clips this window has preloaded, so audition and the voice tester never re-request a cached key.</summary>
+        private readonly HashSet<AudioEvent> _preloaded = new();
+
+        /// <summary>The sheet selected for AudioSheet audition, and the chosen entry index within it.</summary>
+        private AudioSheet _auditionSheet;
+        private int _auditionSheetIndex;
+
+        /// <summary>Test voiceline asset and priority for the Voice tab enqueue control.</summary>
+        private VoicelineEvent _voiceTestEvent;
+        private VoicelinePriority _voiceTestPriority = VoicelinePriority.Normal;
+
+        /// <summary>Opens the Audio control centre via the Unity menu.</summary>
         [MenuItem("Unwind/Audio/Manager")]
         public static void Open() => GetWindow<AudioManagerWindow>("Audio").Show();
 
-        /// <summary>
-        /// Subscribes to per-frame repaints and play mode transitions, loads <see cref="_audioSettings"/>,
-        /// and injects immediately if the window is opened while already in play mode.
-        /// </summary>
+        // ── Lifecycle ───────────────────────────────────────────────────────
+
         private void OnEnable()
         {
-            EditorApplication.update += Repaint;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            _currentTab = (Tab)SessionState.GetInt(TabStateKey, (int)Tab.Live);
             LoadSettings();
 
-            if (Application.isPlaying) Inject();
+            if (Application.isPlaying)
+            {
+                Inject();
+                EnableRepaint();
+            }
         }
 
-        /// <summary>Unsubscribes from per-frame repaints and play mode transition events.</summary>
         private void OnDisable()
         {
-            EditorApplication.update -= Repaint;
+            DisableRepaint();
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            SessionState.SetInt(TabStateKey, (int)_currentTab);
         }
 
-        /// <summary>
-        /// Routes play mode transitions: injects on <see cref="PlayModeStateChange.EnteredPlayMode"/>,
-        /// resets on <see cref="PlayModeStateChange.ExitingPlayMode"/>.
-        /// </summary>
+        /// <summary>Injects on entering play mode, resets on leaving it.</summary>
         private void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            if (state == PlayModeStateChange.EnteredPlayMode) Inject();
-            if (state == PlayModeStateChange.ExitingPlayMode) ResetState();
+            if (state == PlayModeStateChange.EnteredPlayMode)
+            {
+                Inject();
+                EnableRepaint();
+            }
+            else if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                DisableRepaint();
+                ResetState();
+            }
+        }
+
+        /// <summary>Subscribes per-frame repaint so live meters update. Idempotent.</summary>
+        private void EnableRepaint()
+        {
+            if (_repainting) return;
+            EditorApplication.update += Repaint;
+            _repainting = true;
+        }
+
+        /// <summary>Unsubscribes per-frame repaint. Idempotent.</summary>
+        private void DisableRepaint()
+        {
+            if (!_repainting) return;
+            EditorApplication.update -= Repaint;
+            _repainting = false;
         }
 
         /// <summary>
-        /// Resolves all <see cref="InjectAttribute"/>-marked fields via the Reflex root container
-        /// and initialises per-category tracking.
-        /// Uses <see cref="AttributeInjector"/> rather than constructor injection because
-        /// <see cref="EditorWindow"/> instances are created by Unity, not the container.
+        /// Resolves all <see cref="InjectAttribute"/> fields via the Reflex root container.
+        /// Uses <see cref="AttributeInjector"/> because <see cref="EditorWindow"/> instances are created by Unity.
         /// </summary>
         private void Inject()
         {
             AttributeInjector.Inject(this, Container.RootContainer);
             _injected = true;
-            InitCategoryDicts();
         }
 
-        /// <summary>
-        /// Nulls the manager reference and clears all runtime tracking to prevent access to a
-        /// disposed instance during the brief window between
-        /// <see cref="PlayModeStateChange.ExitingPlayMode"/> and container teardown.
-        /// </summary>
+        /// <summary>Drops manager references and runtime tracking to avoid touching disposed instances.</summary>
         private void ResetState()
         {
             _audioManager = null;
+            _musicManager = null;
+            _voicelineManager = null;
             _injected = false;
-            _handleVolumes.Clear();
-            _handleSpeeds.Clear();
-            _categoryVolumes.Clear();
-            _categorySpeeds.Clear();
+            _mutedVolumes.Clear();
+            _preloaded.Clear();
+            _auditionId = Guid.Empty;
             Repaint();
         }
 
-        /// <summary>
-        /// Loads <see cref="AudioSettings"/> via <see cref="AssetDatabase"/> rather than the container
-        /// so the Home tab can render in edit mode without requiring play mode.
-        /// No-op if no <see cref="AudioSettings"/> asset exists in the project.
-        /// </summary>
+        /// <summary>Loads the first <see cref="AudioSettings"/> asset so the Home tab renders without play mode.</summary>
         private void LoadSettings()
         {
             var guids = AssetDatabase.FindAssets("t:AudioSettings");
             if (guids.Length == 0) return;
-            _audioSettings = AssetDatabase.LoadAssetAtPath<AudioSettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            _audioSettings = AssetDatabase.LoadAssetAtPath<Shared.AudioSettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
 
-        /// <summary>
-        /// Seeds <see cref="_categoryVolumes"/> and <see cref="_categorySpeeds"/> to 1 for every
-        /// <see cref="AudioCategory"/> value, matching the initial state set by
-        /// <see cref="Runtime.BuiltIn.BuiltInAudio"/> at construction.
-        /// Does not read back current values from the backend.
-        /// </summary>
-        private void InitCategoryDicts()
-        {
-            foreach (AudioCategory cat in Enum.GetValues(typeof(AudioCategory)))
-            {
-                _categoryVolumes[cat] = 1f;
-                _categorySpeeds[cat] = 1f;
-            }
-        }
+        // ── GUI root ────────────────────────────────────────────────────────
 
-        /// <summary>Main GUI entry point. Draws the header, tab bar, and the active tab body.</summary>
         private void OnGUI()
         {
             DrawHeader();
@@ -171,38 +199,49 @@ namespace Systems.Audio.Editor
             {
                 case Tab.Home:     DrawHomeTab();     break;
                 case Tab.Live:     DrawLiveTab();     break;
+                case Tab.Music:    DrawMusicTab();    break;
+                case Tab.Voice:    DrawVoiceTab();    break;
                 case Tab.Settings: DrawSettingsTab(); break;
+                case Tab.Audition: DrawAuditionTab(); break;
                 default: throw new ArgumentOutOfRangeException();
             }
         }
 
-        // ── Header ────────────────────────────────────────────────────────────
-
-        /// <summary>Draws the window title and descriptive subtitle.</summary>
         private static void DrawHeader()
         {
             EditorGUILayout.Space(4);
-            EditorGUILayout.LabelField("Audio Manager", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Audio Control Centre", EditorStyles.boldLabel);
             EditorGUILayout.LabelField("Runtime audio inspection and control.", EditorStyles.miniLabel);
             EditorGUILayout.Space(4);
         }
 
-        // ── Tabs ──────────────────────────────────────────────────────────────
-
-        /// <summary>Draws the tab toolbar and updates <see cref="_currentTab"/> on selection.</summary>
         private void DrawTabs()
         {
             _currentTab = (Tab)GUILayout.Toolbar((int)_currentTab, TabLabels);
             DrawSeparator();
         }
 
+        /// <summary>
+        /// Returns true when the managers are available, otherwise draws an explanatory box.
+        /// Guards every play-mode-only tab.
+        /// </summary>
+        private bool RequireRuntime()
+        {
+            if (!Application.isPlaying)
+            {
+                EditorGUILayout.HelpBox("Enter Play Mode to use this tab.", MessageType.Info);
+                return false;
+            }
+            if (!_injected || _audioManager == null)
+            {
+                EditorGUILayout.HelpBox("Audio services not found.", MessageType.Warning);
+                return false;
+            }
+            return true;
+        }
+
         // ── Home tab ──────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Draws the Home tab. Displays the active <see cref="AudioSettings"/> configuration as
-        /// read-only fields and provides a button to ping the asset in the Project window.
-        /// Available in both edit and play modes.
-        /// </summary>
         private void DrawHomeTab()
         {
             if (_audioSettings == null)
@@ -212,196 +251,387 @@ namespace Systems.Audio.Editor
             }
 
             EditorGUILayout.LabelField("Configuration", EditorStyles.boldLabel);
-
             using (new EditorGUI.DisabledScope(true))
             {
                 EditorGUILayout.EnumPopup("Backend", _audioSettings.Backend);
                 EditorGUILayout.IntField("Pool Size", _audioSettings.PoolSize);
             }
 
-            EditorGUILayout.Space(4);
-
             if (GUILayout.Button("Select AudioSettings Asset"))
                 Selection.activeObject = _audioSettings;
+
+            if (!Application.isPlaying || !_injected || _audioManager == null) return;
+
+            DrawSeparator();
+            EditorGUILayout.LabelField("Backend Diagnostics", EditorStyles.boldLabel);
+
+            if (!_audioManager.TryGetBackendStats(out var stats))
+            {
+                EditorGUILayout.LabelField("Active backend reports no statistics.", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
+            EditorGUILayout.LabelField("Active sources", stats.ActiveSources.ToString());
+            EditorGUILayout.LabelField("Created sources", $"{stats.CreatedSources} (configured {stats.ConfiguredPoolSize})");
+            EditorGUILayout.LabelField("Cached clips", stats.CachedClips.ToString());
+            EditorGUILayout.LabelField("In-flight loads", stats.InFlightLoads.ToString());
+
+            if (stats.PoolGrew)
+                EditorGUILayout.HelpBox(
+                    "The source pool grew past its configured size. Raise AudioSettings.PoolSize to cover peak concurrent sounds.",
+                    MessageType.Warning);
         }
 
         // ── Live tab ──────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Draws the Live tab. Guards against edit-mode access and a missing manager,
-        /// then delegates to <see cref="DrawActiveHandles"/>.
-        /// </summary>
         private void DrawLiveTab()
         {
-            if (!Application.isPlaying)
-            {
-                EditorGUILayout.HelpBox("Enter Play Mode to inspect active sounds.", MessageType.Info);
-                return;
-            }
+            if (!RequireRuntime()) return;
 
-            if (!_injected || _audioManager == null)
-            {
-                EditorGUILayout.HelpBox("AudioManager not found.", MessageType.Warning);
-                return;
-            }
+            var snaps = new List<AudioPlaybackSnapshot>();
+            foreach (var uuid in _audioManager.ActiveUuids.ToList())
+                if (_audioManager.TryGetSnapshot(uuid, out var snap)) snaps.Add(snap);
 
-            DrawActiveHandles();
-        }
-
-        /// <summary>
-        /// Snapshots <see cref="AudioManager.ActiveUuids"/> via <c>ToList</c> to avoid
-        /// modification-during-enumeration if a handle is released mid-frame, syncs
-        /// <see cref="_handleVolumes"/> and <see cref="_handleSpeeds"/> against that snapshot
-        /// (adding new entries at 1, removing stale ones), then draws a scrollable row per
-        /// active instance via <see cref="DrawHandleRow"/>.
-        /// </summary>
-        private void DrawActiveHandles()
-        {
-            var uuids = _audioManager.ActiveUuids.ToList();
-
-            foreach (var uuid in uuids)
-            {
-                _handleVolumes.TryAdd(uuid, 1f);
-                _handleSpeeds.TryAdd(uuid, 1f);
-            }
-
-            foreach (var stale in _handleVolumes.Keys.Except(uuids).ToList())
-            {
-                _handleVolumes.Remove(stale);
-                _handleSpeeds.Remove(stale);
-            }
-
-            EditorGUILayout.LabelField(
-                $"{uuids.Count} active sound{(uuids.Count == 1 ? "" : "s")}",
-                EditorStyles.miniLabel);
+            _handleSearch = EditorGUILayout.TextField("Search", _handleSearch);
+            EditorGUILayout.LabelField($"{snaps.Count} active ({CategoryCounts(snaps)})", EditorStyles.miniLabel);
             DrawSeparator();
 
-            if (uuids.Count == 0)
+            var filtered = string.IsNullOrEmpty(_handleSearch)
+                ? snaps
+                : snaps.Where(s => s.Name.IndexOf(_handleSearch, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+            if (filtered.Count == 0)
             {
-                EditorGUILayout.LabelField("No active sounds.", EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.LabelField("No matching sounds.", EditorStyles.centeredGreyMiniLabel);
                 return;
             }
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
-
-            foreach (var uuid in uuids)
+            foreach (var snap in filtered)
             {
-                DrawHandleRow(uuid);
+                DrawHandleRow(snap);
                 DrawSeparator();
             }
-
             EditorGUILayout.EndScrollView();
         }
 
-        /// <summary>
-        /// Draws a single handle row: a truncated UUID, playing status, volume and speed sliders,
-        /// and Stop / Pause / Resume buttons.
-        /// Volume and speed changes are applied to <see cref="AudioManager"/> immediately so the
-        /// live sound is affected in the same frame the slider is dragged.
-        /// </summary>
-        /// <param name="uuid">The UUID of the active playback instance to render.</param>
-        private void DrawHandleRow(Guid uuid)
+        private void DrawHandleRow(AudioPlaybackSnapshot s)
         {
-            var isPlaying = _audioManager.IsPlaying(uuid);
-            var shortId = uuid.ToString()[..8];
-
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(shortId, EditorStyles.boldLabel, GUILayout.Width(80));
+            EditorGUILayout.LabelField(s.Name, EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
             EditorGUILayout.LabelField(
-                isPlaying ? "● Playing" : "○ Stopped",
-                isPlaying ? EditorStyles.miniLabel : EditorStyles.centeredGreyMiniLabel);
+                s.IsLooping ? $"{s.Category} (loop)" : s.Category.ToString(),
+                EditorStyles.miniLabel, GUILayout.Width(110));
+            EditorGUILayout.LabelField(StatusLabel(s), EditorStyles.miniLabel, GUILayout.Width(70));
             EditorGUILayout.EndHorizontal();
 
-            DrawFloatSlider("Vol", _handleVolumes[uuid], 0f, 2f, v =>
-            {
-                _handleVolumes[uuid] = v;
-                _audioManager.SetVolume(uuid, v);
-            });
+            DrawFloatSlider("Vol", s.Volume, 0f, 2f, v => _audioManager.SetVolume(s.Uuid, v));
+            DrawFloatSlider("Spd", s.Speed, 0f, 3f, v => _audioManager.SetSpeed(s.Uuid, v));
 
-            DrawFloatSlider("Spd", _handleSpeeds[uuid], 0f, 3f, v =>
+            if (!s.IsLooping && s.Length > 0f)
             {
-                _handleSpeeds[uuid] = v;
-                _audioManager.SetSpeed(uuid, v);
-            });
+                var rect = EditorGUILayout.GetControlRect(false, 14);
+                EditorGUI.ProgressBar(rect, Mathf.Clamp01(s.Time / s.Length), $"{s.Time:0.0} / {s.Length:0.0}s");
+            }
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Stop",   EditorStyles.miniButton)) _audioManager.Stop(uuid);
-            if (GUILayout.Button("Pause",  EditorStyles.miniButton)) _audioManager.Pause(uuid);
-            if (GUILayout.Button("Resume", EditorStyles.miniButton)) _audioManager.Resume(uuid);
+            if (GUILayout.Button("Stop", EditorStyles.miniButton)) _audioManager.Stop(s.Uuid);
+            if (GUILayout.Button("Pause", EditorStyles.miniButton)) _audioManager.Pause(s.Uuid);
+            if (GUILayout.Button("Resume", EditorStyles.miniButton)) _audioManager.Resume(s.Uuid);
             EditorGUILayout.EndHorizontal();
+        }
+
+        private static string StatusLabel(AudioPlaybackSnapshot s) =>
+            s.IsPaused ? "Paused" : s.IsPlaying ? "Playing" : "Stopped";
+
+        private static string CategoryCounts(List<AudioPlaybackSnapshot> snaps) =>
+            snaps.Count == 0
+                ? "none"
+                : string.Join(", ", snaps.GroupBy(s => s.Category).Select(g => $"{g.Key}:{g.Count()}"));
+
+        // ── Music tab ───────────────────────────────────────────────────────
+
+        private void DrawMusicTab()
+        {
+            if (!RequireRuntime()) return;
+            if (_musicManager == null)
+            {
+                EditorGUILayout.HelpBox("MusicManager not found.", MessageType.Warning);
+                return;
+            }
+
+            var track = _musicManager.CurrentTrack;
+            EditorGUILayout.LabelField("Playlist", _musicManager.ActivePlaylist.ToString());
+            EditorGUILayout.LabelField("Track",
+                track != null
+                    ? $"{track.name}  ({_musicManager.CurrentTrackIndex + 1}/{_musicManager.TrackCount})"
+                    : "none");
+            EditorGUILayout.LabelField("State", StateLabel(_musicManager.IsPlaying, _musicManager.IsPaused));
+            DrawSeparator();
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Prev")) _musicManager.PreviousTrack();
+            if (GUILayout.Button(_musicManager.IsPlaying ? "Pause" : "Play")) _musicManager.TogglePause();
+            if (GUILayout.Button("Next")) _musicManager.NextTrack();
+            if (GUILayout.Button("Restart")) _musicManager.Restart();
+            if (GUILayout.Button("Stop")) _musicManager.Stop();
+            EditorGUILayout.EndHorizontal();
+
+            var shuffle = EditorGUILayout.Toggle("Shuffle", _musicManager.ShuffleEnabled);
+            if (shuffle != _musicManager.ShuffleEnabled) _musicManager.SetShuffle(shuffle);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Activate", GUILayout.Width(60));
+            if (GUILayout.Button("Menu")) _musicManager.ActivatePlaylist(PlaylistType.Menu).Forget();
+            if (GUILayout.Button("Combat")) _musicManager.ActivatePlaylist(PlaylistType.Combat).Forget();
+            if (GUILayout.Button("None")) _musicManager.ActivatePlaylist(PlaylistType.None).Forget();
+            EditorGUILayout.EndHorizontal();
+
+            DrawSeparator();
+            DrawFloatSlider("Vol", _musicManager.Volume, 0f, 1f, v => _musicManager.SetVolume(v));
+            DrawFadeControl(ref _musicFadeTarget, ref _musicFadeDuration,
+                (t, d) => _musicManager.FadeVolumeToAsync(t, d).Forget());
+        }
+
+        // ── Voice tab ───────────────────────────────────────────────────────
+
+        private void DrawVoiceTab()
+        {
+            if (!RequireRuntime()) return;
+            if (_voicelineManager == null)
+            {
+                EditorGUILayout.HelpBox("VoicelineManager not found.", MessageType.Warning);
+                return;
+            }
+
+            var current = _voicelineManager.CurrentVoiceline;
+            EditorGUILayout.LabelField("Current", current != null ? current.name : "none");
+            EditorGUILayout.LabelField("Priority",
+                _voicelineManager.CurrentPriority?.ToString() ?? "none");
+            EditorGUILayout.LabelField("Subtitle key", current != null ? current.SubtitleKey : "none");
+            EditorGUILayout.LabelField("State", StateLabel(_voicelineManager.IsPlaying, _voicelineManager.IsPaused));
+            EditorGUILayout.LabelField("Queued", _voicelineManager.QueueCount.ToString());
+            DrawSeparator();
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(_voicelineManager.IsPlaying ? "Pause" : "Resume")) _voicelineManager.TogglePause();
+            if (GUILayout.Button("Skip")) _voicelineManager.Skip();
+            if (GUILayout.Button("Restart")) _voicelineManager.Restart();
+            if (GUILayout.Button("Clear")) _voicelineManager.Clear();
+            if (GUILayout.Button("Stop")) _voicelineManager.Stop();
+            EditorGUILayout.EndHorizontal();
+
+            DrawSeparator();
+            EditorGUILayout.LabelField("Queue", EditorStyles.boldLabel);
+            var queued = _voicelineManager.GetQueuedVoicelines();
+            if (queued.Count == 0)
+                EditorGUILayout.LabelField("Empty.", EditorStyles.centeredGreyMiniLabel);
+            foreach (var ev in queued)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(ev != null ? ev.name : "(null)", EditorStyles.miniLabel);
+                if (GUILayout.Button("Remove", EditorStyles.miniButton, GUILayout.Width(70)))
+                    _voicelineManager.RemoveFromQueue(ev);
+                EditorGUILayout.EndHorizontal();
+            }
+
+            DrawSeparator();
+            EditorGUILayout.LabelField("Test", EditorStyles.boldLabel);
+            _voiceTestEvent = (VoicelineEvent)EditorGUILayout.ObjectField("Voiceline", _voiceTestEvent, typeof(VoicelineEvent), false);
+            _voiceTestPriority = (VoicelinePriority)EditorGUILayout.EnumPopup("Priority", _voiceTestPriority);
+            using (new EditorGUI.DisabledScope(_voiceTestEvent == null))
+                if (GUILayout.Button("Preload and Play"))
+                    PlayVoicelineAsync(_voiceTestEvent, _voiceTestPriority).Forget();
+
+            DrawSeparator();
+            DrawFloatSlider("Vol", _voicelineManager.Volume, 0f, 1f, v => _voicelineManager.SetVolume(v));
+            DrawFadeControl(ref _voiceFadeTarget, ref _voiceFadeDuration,
+                (t, d) => _voicelineManager.FadeVolumeToAsync(t, d).Forget());
+        }
+
+        private async UniTaskVoid PlayVoicelineAsync(VoicelineEvent ev, VoicelinePriority priority)
+        {
+            if (ev == null || ev.AudioEvent == null) return;
+            if (!_preloaded.Contains(ev.AudioEvent))
+            {
+                await _voicelineManager.PreloadAsync(ev);
+                _preloaded.Add(ev.AudioEvent);
+            }
+            _voicelineManager.Play(ev, priority);
         }
 
         // ── Settings tab ──────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Draws the Settings tab. Provides per-<see cref="AudioCategory"/> master volume and speed
-        /// sliders and bulk Stop / Pause / Resume actions.
-        /// Slider values are pushed to <see cref="AudioManager"/> on change and mirrored in
-        /// <see cref="_categoryVolumes"/> and <see cref="_categorySpeeds"/> for display continuity
-        /// across repaints.
-        /// </summary>
         private void DrawSettingsTab()
         {
-            if (!Application.isPlaying)
-            {
-                EditorGUILayout.HelpBox("Enter Play Mode to control audio categories.", MessageType.Info);
-                return;
-            }
-
-            if (!_injected || _audioManager == null)
-            {
-                EditorGUILayout.HelpBox("AudioManager not found.", MessageType.Warning);
-                return;
-            }
+            if (!RequireRuntime()) return;
 
             EditorGUILayout.LabelField("Category Volumes", EditorStyles.boldLabel);
             foreach (AudioCategory cat in Enum.GetValues(typeof(AudioCategory)))
-            {
-                DrawFloatSlider(cat.ToString(), _categoryVolumes[cat], 0f, 2f, v =>
-                {
-                    _categoryVolumes[cat] = v;
-                    _audioManager.SetCategoryVolume(cat, v);
-                });
-            }
+                DrawCategoryVolumeRow(cat);
 
             DrawSeparator();
-
             EditorGUILayout.LabelField("Category Speeds", EditorStyles.boldLabel);
             foreach (AudioCategory cat in Enum.GetValues(typeof(AudioCategory)))
-            {
-                DrawFloatSlider(cat.ToString(), _categorySpeeds[cat], 0f, 3f, v =>
-                {
-                    _categorySpeeds[cat] = v;
-                    _audioManager.SetCategorySpeed(cat, v);
-                });
-            }
+                DrawFloatSlider(cat.ToString(), _audioManager.GetCategorySpeed(cat), 0f, 3f,
+                    v => _audioManager.SetCategorySpeed(cat, v));
 
             DrawSeparator();
+            if (GUILayout.Button("Reset All To 1")) ResetCategories();
 
+            DrawSeparator();
             EditorGUILayout.LabelField("Category Actions", EditorStyles.boldLabel);
             foreach (AudioCategory cat in Enum.GetValues(typeof(AudioCategory)))
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(cat.ToString(), GUILayout.Width(60));
-                if (GUILayout.Button("Stop All",   EditorStyles.miniButton)) _audioManager.StopAll(cat);
-                if (GUILayout.Button("Pause All",  EditorStyles.miniButton)) _audioManager.PauseAll(cat);
+                if (GUILayout.Button("Stop All", EditorStyles.miniButton)) _audioManager.StopAll(cat);
+                if (GUILayout.Button("Pause All", EditorStyles.miniButton)) _audioManager.PauseAll(cat);
                 if (GUILayout.Button("Resume All", EditorStyles.miniButton)) _audioManager.ResumeAll(cat);
                 EditorGUILayout.EndHorizontal();
             }
         }
 
-        // ── Shared drawing utilities ──────────────────────────────────────────
+        private void DrawCategoryVolumeRow(AudioCategory cat)
+        {
+            var muted = _mutedVolumes.ContainsKey(cat);
+
+            EditorGUILayout.BeginHorizontal();
+            using (new EditorGUI.DisabledScope(muted))
+                DrawFloatSlider(cat.ToString(), _audioManager.GetCategoryVolume(cat), 0f, 2f,
+                    v => _audioManager.SetCategoryVolume(cat, v));
+
+            var nextMuted = GUILayout.Toggle(muted, "M", EditorStyles.miniButton, GUILayout.Width(24));
+            if (nextMuted != muted) SetMuted(cat, nextMuted);
+            if (GUILayout.Button("Solo", EditorStyles.miniButton, GUILayout.Width(44))) Solo(cat);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void SetMuted(AudioCategory cat, bool muted)
+        {
+            if (muted)
+            {
+                _mutedVolumes[cat] = _audioManager.GetCategoryVolume(cat);
+                _audioManager.SetCategoryVolume(cat, 0f);
+            }
+            else if (_mutedVolumes.Remove(cat, out var previous))
+            {
+                _audioManager.SetCategoryVolume(cat, previous);
+            }
+        }
+
+        private void Solo(AudioCategory soloed)
+        {
+            foreach (AudioCategory cat in Enum.GetValues(typeof(AudioCategory)))
+                SetMuted(cat, cat != soloed);
+        }
+
+        private void ResetCategories()
+        {
+            _mutedVolumes.Clear();
+            foreach (AudioCategory cat in Enum.GetValues(typeof(AudioCategory)))
+            {
+                _audioManager.SetCategoryVolume(cat, 1f);
+                _audioManager.SetCategorySpeed(cat, 1f);
+            }
+        }
+
+        // ── Audition tab ──────────────────────────────────────────────────────
+
+        private void DrawAuditionTab()
+        {
+            if (!RequireRuntime()) return;
+
+            EditorGUILayout.LabelField("AudioEvent", EditorStyles.boldLabel);
+            _auditionEvent = (AudioEvent)EditorGUILayout.ObjectField("Event", _auditionEvent, typeof(AudioEvent), false);
+            DrawAuditionControls(_auditionEvent);
+
+            DrawSeparator();
+            EditorGUILayout.LabelField("AudioSheet", EditorStyles.boldLabel);
+            _auditionSheet = (AudioSheet)EditorGUILayout.ObjectField("Sheet", _auditionSheet, typeof(AudioSheet), false);
+
+            if (_auditionSheet == null || _auditionSheet.AudioEvents.Count == 0)
+            {
+                EditorGUILayout.LabelField("Assign a sheet with entries to audition by ID.", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
+            var ids = _auditionSheet.AudioEvents.Keys.ToArray();
+            var labels = ids.Select(id =>
+            {
+                var ev = _auditionSheet.AudioEvents[id];
+                return $"{id}: {(ev != null ? ev.name : "(null)")}";
+            }).ToArray();
+
+            _auditionSheetIndex = Mathf.Clamp(_auditionSheetIndex, 0, ids.Length - 1);
+            _auditionSheetIndex = EditorGUILayout.Popup("Entry", _auditionSheetIndex, labels);
+
+            DrawAuditionControls(_auditionSheet.Get(ids[_auditionSheetIndex]));
+        }
 
         /// <summary>
-        /// Draws a labeled horizontal slider and invokes <paramref name="onChange"/> only when the
-        /// value has actually changed, avoiding redundant callbacks to <see cref="AudioManager"/>
-        /// on every repaint while the slider is idle.
+        /// Draws the Preload, Play, Stop, and Unload row for <paramref name="ev"/>.
+        /// Preload runs only when the clip is not already tracked as preloaded, so re-auditioning a clip
+        /// never re-requests an already-cached key. Play stays disabled until the clip is preloaded.
         /// </summary>
-        /// <param name="label">Display label rendered to the left of the slider.</param>
-        /// <param name="current">The current value used to seed the slider position.</param>
-        /// <param name="min">The minimum value the slider can produce.</param>
-        /// <param name="max">The maximum value the slider can produce.</param>
-        /// <param name="onChange">Invoked with the new value when it differs from <paramref name="current"/>.</param>
+        /// <param name="ev">The event to audition, or null when nothing is selected.</param>
+        private void DrawAuditionControls(AudioEvent ev)
+        {
+            var preloaded = ev != null && _preloaded.Contains(ev);
+
+            EditorGUILayout.BeginHorizontal();
+            using (new EditorGUI.DisabledScope(ev == null || preloaded))
+                if (GUILayout.Button("Preload")) PreloadAuditionAsync(ev).Forget();
+            using (new EditorGUI.DisabledScope(!preloaded))
+                if (GUILayout.Button("Play")) _auditionId = _audioManager.Play(ev);
+            using (new EditorGUI.DisabledScope(_auditionId == Guid.Empty))
+                if (GUILayout.Button("Stop")) StopAudition();
+            using (new EditorGUI.DisabledScope(!preloaded))
+                if (GUILayout.Button("Unload")) UnloadAudition(ev);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        /// <summary>Preloads <paramref name="ev"/> once and tracks it. No-op when null or already preloaded.</summary>
+        private async UniTaskVoid PreloadAuditionAsync(AudioEvent ev)
+        {
+            if (ev == null || _preloaded.Contains(ev)) return;
+            await _audioManager.PreloadAsync(ev);
+            _preloaded.Add(ev);
+        }
+
+        /// <summary>Stops the active audition playback, if any.</summary>
+        private void StopAudition()
+        {
+            if (_auditionId == Guid.Empty) return;
+            _audioManager.Stop(_auditionId);
+            _auditionId = Guid.Empty;
+        }
+
+        /// <summary>Releases <paramref name="ev"/> and drops it from the preloaded set.</summary>
+        private void UnloadAudition(AudioEvent ev)
+        {
+            if (ev == null) return;
+            _audioManager.Unload(ev);
+            _preloaded.Remove(ev);
+        }
+
+        // ── Shared drawing utilities ──────────────────────────────────────────
+
+        private static string StateLabel(bool playing, bool paused) =>
+            paused ? "Paused" : playing ? "Playing" : "Stopped";
+
+        /// <summary>Draws a fade target slider, duration field, and a Fade button invoking <paramref name="fade"/>.</summary>
+        private static void DrawFadeControl(ref float target, ref float duration, Action<float, float> fade)
+        {
+            EditorGUILayout.BeginHorizontal();
+            target = EditorGUILayout.Slider("Fade to", target, 0f, 1f);
+            duration = EditorGUILayout.FloatField(duration, GUILayout.Width(40));
+            if (GUILayout.Button("Fade", GUILayout.Width(50))) fade(target, Mathf.Max(0f, duration));
+            EditorGUILayout.EndHorizontal();
+        }
+
+        /// <summary>Draws a labelled slider and invokes <paramref name="onChange"/> only when the value changes.</summary>
         private static void DrawFloatSlider(string label, float current, float min, float max, Action<float> onChange)
         {
             EditorGUILayout.BeginHorizontal();
@@ -413,7 +643,6 @@ namespace Systems.Audio.Editor
                 onChange(next);
         }
 
-        /// <summary>Draws a 1 px horizontal separator line followed by a small vertical gap.</summary>
         private static void DrawSeparator()
         {
             var rect = EditorGUILayout.GetControlRect(false, 1);

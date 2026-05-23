@@ -1,0 +1,337 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: SFX
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: SFX
+  m_GUID: ee738e538aa5dda54adbf4397b2190a0
+  m_SerializeEntries:
+  - m_GUID: 05ca6a9e82488d04f91b64b526fb59e7
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Heavy_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0d6ca88e33809e34db3931adb9485dfe
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Axe_Heavy_L_b.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0fa6a44dbc01a314c84d0bc53c3cae26
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Heavy_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 101192526a38d6b47bc66db16a6c3c00
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Heavy_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 134749b27a6c54e4580a3f12f44633a6
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Sharp_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 148c3ef83b491ca4c8e20cb73f409643
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Sharp_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a43479839f019047acb7f2ec2c4d3ab
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Heavy_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a7e3a9257e60414ca61b9263130346a
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Sharp_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f6181c0b3ce7bb4cbd553d6c27b08b4
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Heavy_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 204cfcdfd9e7db149979281bf76aa6d5
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Sharp_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 26c18619fb2b2a44ea24f37176d09d7d
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Axe_Heavy_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ab0eafb0221d4f42a169e8dcdd47891
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Heavy_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c57150b3eef1214dbbd6a9a0a65cca9
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Heavy_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2cf80104d8b45554f8ba917ea0a688fc
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Heavy_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ece310db280c004fb0bc2c8f17e1c0d
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Heavy_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f187f62a7b755046ac1e3d32bcdf4a9
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Heavy_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 382048c62bf805b4191111f2f3a36cd9
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Heavy_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 38e7cd0ea89131841b2157ba6ef01eb9
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Sharp_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3b05bb69d72b3714aa20d67949bed4b8
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Sharp_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3fd95dd0cc1a27e429e546de840edc5e
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Heavy_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40ce0533dfd154b4cb93ea41f8ee2732
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Heavy_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 41b0e3af847503547b70c1d9550cb1e0
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Sharp_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 42cbf6a50ad398145a8982fdef031495
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Sharp_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 498bf41f1105d8e4a874fb5ee562cd47
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Sharp_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54c7bdfd0ab186d42b45ee457bef7514
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Heavy_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 567a3a05926724e42a6d2b037d18bbfd
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Sharp_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 584a28de93fee354e8653529e6d20bb5
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Sharp_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5a0426cf0bd140e42a7b50141bb081ba
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Sharp_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c086c45be378a14cb6a89daa0c97451
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Sharp_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5fadfbce2a1ea8c4185d0992bc1c5f99
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Sharp_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69d9212a6bf1bf740969ad83b6c7f1fc
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Axe_Heavy_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69fa593b1ac36fb4894b10d0788afd8a
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Sharp_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a4994f001c7dcb43a9377a76d043fcf
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Sharp_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b161771ebcb7af4fafb61a7767fc38e
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Heavy_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76038e9cc62fd9c41815ebcadf15465b
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Sharp_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7677bc987934e3e49afb6f8e1cbba3e6
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Heavy_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 768bf9554eeeb3e4a88df7fd5dc338d3
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Heavy_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77cc98b531dadbf4e8b3658c7a428074
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Sharp_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 78b14c217fcf41f4b9eb5773a4159580
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Sharp_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 802e5701bc21930438067a636eaba670
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Heavy_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87cb7add05d11bf4eb645a9a037b33f8
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Heavy_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d133b015e0d3a24e9a75f731e2adaaf
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Sharp_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f9e94d24ef2d1b4b9e09a3a962ac3e7
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Axe_Heavy_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92b8b571c602c3e4a8850bbe82170451
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Axe_Heavy_L_a.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93f9f4788af5c294cbf07d7018d9ea6b
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Heavy_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a04aebb9ad150194f82f6a0542021663
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Heavy_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a182c140233499d418cd328abc38d66b
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Heavy_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a4f829f048cf5a34889414b4924535b0
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Sharp_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aed1f4f130cb54547bb16bc052184220
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Heavy_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b01ed25937361414a81691bccc2fa269
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Heavy_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b392ee8c1b03e5143adc53c2150295ef
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Sharp_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c820759397460d24abb897ba0fee5278
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Sharp_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8d9e441a05baca429c742fde472bf4f
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Sharp_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d357808bf735631469309586aa406509
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Heavy_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d40b35963fb86db4d9585b7a1ab92e58
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Heavy_S_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db3010ac70402214cbc263cf0755ed08
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Pole_Heavy_L_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd96ca61670d8434e9cc3e3c88848074
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Sharp_M_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e2642f8d8a9462144bfd648adbf086bb
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Sword_Heavy_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ea5de58e49ce7054580c8c3d8058fab8
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Grap_Heavy_L_b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ece4ef851aaf2bc46a3d5ab45865acde
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Sharp_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ede4e78db3afb6041ae3629977fc2865
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Hammer_Sharp_M_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f62b4dac1edfb3148b2213a1d084435e
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Slash_Sharp_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f6f48d0a370a58246be795322368277d
+    m_Address: Audio/SFX/Common/SE_BTL_CMN_Swing_Axe_Heavy_S_a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 4e602854eb5abe04cab3ba7e9406b755, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 0aa782d00c243eb4fb0001ef0d1d2670, type: 2}

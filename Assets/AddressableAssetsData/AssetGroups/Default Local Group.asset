@@ -18,7 +18,8 @@ MonoBehaviour:
   - m_GUID: 1a1779c4626dd0345a58da7d56186180
     m_Address: Assets/Systems/Combat/Combatant/Data/CombatantRedeemer/RedeemerSO.asset
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - RDR
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4957af42e7e6cb84a85d47df9e874702
     m_Address: Assets/Systems/Stage/Data/RuinedCathedral/RuinedCathedralScene.unity
@@ -28,7 +29,8 @@ MonoBehaviour:
   - m_GUID: 69ff5439f33bad74d816a11362640e63
     m_Address: Assets/Characters/RDR/RDR_Prefab.prefab
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - RDR
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 937ac79548416a74793f86131d1f7ae9
     m_Address: Assets/Systems/Stage/Data/RuinedCathedral/RuinedCathedralStageEntry.asset
@@ -40,4 +42,3 @@ MonoBehaviour:
   m_SchemaSet:
     m_Schemas:
     - {fileID: 11400000, guid: b6b84c3028c667e4ea8a4fefe2f928f1, type: 2}
-    - {fileID: 11400000, guid: 02ece1e42a9160f42852f0aac75c2056, type: 2}

@@ -121,6 +121,8 @@ namespace Systems.UI.CombatantSelect
 
         public void Dispose()
         {
+            _playerRegistry.OnPlayerJoined -= HandlePlayerJoined;
+            UnsubscribeAllPlayerHandlers();
         }
 
         public void Begin()
@@ -128,25 +130,26 @@ namespace Systems.UI.CombatantSelect
             _characterSelectCanvas.gameObject.SetActive(true);
             BeginCharacterSelection();
 
+            _playerRegistry.OnPlayerJoined -= HandlePlayerJoined;
             _playerRegistry.OnPlayerJoined += HandlePlayerJoined;
         }
 
         private void BeginCharacterSelection()
         {
+            UnsubscribeAllPlayerHandlers();
+
             _combatantSelectState = CharacterSelectState.CombatantSelection;
+            _encounterData = new CombatEncounterData();
+            _playerHandlers = new Dictionary<int, PlayerUIHandler>();
 
             _combatantSelectionGrid.SetActive(true);
             _stageSelectionLayout.SetActive(false);
 
-            // Force the canvas to update so that the layout is calculated, if not, sizes and positions will be wrong until the end of frame.
             Canvas.ForceUpdateCanvases();
 
             var players = _playerRegistry.GetAllPlayers();
-
             foreach (var playerLinker in players)
-            {
                 HandlePlayerJoined(playerLinker);
-            }
         }
 
         private void BeginStageSelection()
@@ -171,7 +174,7 @@ namespace Systems.UI.CombatantSelect
         private void EndStageSelection()
         {
             _playerRegistry.OnPlayerJoined -= HandlePlayerJoined;
-            
+
             _playerHandlers[0].DisableUI();
 
             _characterSelectCanvas.gameObject.SetActive(false);
@@ -387,6 +390,15 @@ namespace Systems.UI.CombatantSelect
             if (_encounterData is { Combatant0: not null, Combatant1: not null })
             {
                 BeginStageSelection();
+            }
+        }
+
+        private void UnsubscribeAllPlayerHandlers()
+        {
+            foreach (var handler in _playerHandlers.Values)
+            {
+                handler.PlayerLinker.OnUINavigate -= OnPlayerNavigate;
+                handler.PlayerLinker.OnUISubmit -= OnPlayerSubmit;
             }
         }
 

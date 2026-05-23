@@ -1,4 +1,5 @@
-using Systems.Data;
+
+using Systems.CPU;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -10,6 +11,8 @@ namespace Systems.Combat.Combatant.Data
         public string combatantCode;
         public string combatantName;
         public AssetReferenceGameObject combatantPrefabReference;
-        public CinematicCameraSequence[] cinematicCameraSequences;
+        public CpuPersonality cpuPersonality;
+        public CpuMoveHintSheet cpuMoveHintSheet;
+        public CpuDefenceHintSheet cpuDefenceHintSheet;
     }
 }

@@ -33,6 +33,14 @@ namespace Systems.Input
             _latchedPress = false;
             return state;
         }
+
+        /// <summary>Drops any latched/held state so stale presses do not carry over.</summary>
+        public void Reset()
+        {
+            _physicalDown = false;
+            _latchedPress = false;
+            _lastFrameHeld = false;
+        }
     }
 
     public class PlayerInputProvider : IInputProvider
@@ -136,6 +144,17 @@ namespace Systems.Input
             Buffer.Write(currentTick);
             _latchedDirection = Vector2.zero;
             return currentTick;
+        }
+
+        public void Flush()
+        {
+            _lightAttackButtonTracker.Reset();
+            _mediumAttackButtonTracker.Reset();
+            _heavyAttackButtonTracker.Reset();
+            _uniqueAttackButtonTracker.Reset();
+            _guardButtonTracker.Reset();
+            _abilityButtonTracker.Reset();
+            _latchedDirection = Vector2.zero;
         }
     }
 }

@@ -33,7 +33,8 @@ namespace Characters.RDR.Common
         {
             OnEachTick(tick =>
             {
-                Owner.CharacterController.DriveVelocityX(Owner.Stats.fWalkSpeed, Owner.Stats.fWalkAcceleration, TickManager.TickInterval);
+                Owner.CharacterController.DriveVelocityX(Owner.Stats.fWalkSpeed, Owner.Stats.fWalkAcceleration,
+                    TickManager.TickInterval);
             });
         }
 
@@ -55,7 +56,8 @@ namespace Characters.RDR.Common
         {
             OnEachTick(input =>
             {
-                Owner.CharacterController.DriveVelocityX(-Owner.Stats.bWalkSpeed, Owner.Stats.bWalkAcceleration, TickManager.TickInterval);
+                Owner.CharacterController.DriveVelocityX(-Owner.Stats.bWalkSpeed, Owner.Stats.bWalkAcceleration,
+                    TickManager.TickInterval);
             });
         }
 
@@ -117,19 +119,20 @@ namespace Characters.RDR.Common
     {
         protected override IEnumerator Script()
         {
+
+            Owner.CharacterController.SetFrictionScale(2.8f);
+            
+            yield return Pose(999, 3);
+            
+            Owner.CharacterController.RestoreFriction();
+
             SetJumpType(EntryInput.Direction.Current switch
             {
                 EDirectionInput.Input7 => EJumpType.Backward,
                 EDirectionInput.Input9 => EJumpType.Forward,
                 _ => EJumpType.Neutral
             });
-
-            yield return Pose(999, 3);
-
-            // Code after the last yield runs when the pose expires, before Finish().
-            // Apply impulse here so the velocity exists before KCC simulates this tick.
-            // Immediately mark airborne so TryEnterMove (called same tick after Finish())
-            // sees Airborne state and CmnActJump wins the candidate search.;
+            
             AddVelocity(JumpType switch
             {
                 EJumpType.Backward => new Vector3(-Stats.bJumpDistance, Stats.jumpHeight, 0),

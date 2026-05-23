@@ -1,0 +1,142 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e03a13cda79a415b9bb3b8b847bf5b90, type: 3}
+  m_Name: AS_CharCommon
+  m_EditorClassIdentifier: Assembly-CSharp::Systems.Audio.AudioSheetSO
+  AudioEvents:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 11400000, guid: 83c1ff98e0683c7c8a26f131cd5b79cc, type: 2}
+    - Key: 1
+      Value: {fileID: 11400000, guid: 85c703473ea46c55cb1bb709db64a350, type: 2}
+    - Key: 2
+      Value: {fileID: 11400000, guid: d67f08fd44b9e442b97432b16d118cc4, type: 2}
+    - Key: 3
+      Value: {fileID: 11400000, guid: 109efca7dfcc374fea96a068509c3762, type: 2}
+    - Key: 4
+      Value: {fileID: 11400000, guid: 64c430b206025cf96940f023e6f26b7b, type: 2}
+    - Key: 5
+      Value: {fileID: 11400000, guid: 7e7d3fe6eb7dc4b2eb4698bfb4aefdfe, type: 2}
+    - Key: 6
+      Value: {fileID: 11400000, guid: a778e994f279014f89b3bc47b5d15ee1, type: 2}
+    - Key: 7
+      Value: {fileID: 11400000, guid: b6cfdf8cbadc64970b8109de845b76d6, type: 2}
+    - Key: 8
+      Value: {fileID: 11400000, guid: 33d64bb73d0b78214be5ee2721a744c2, type: 2}
+    - Key: 9
+      Value: {fileID: 11400000, guid: 6c939279b9a4d6615a22ffdf9acb9a21, type: 2}
+    - Key: 10
+      Value: {fileID: 11400000, guid: c22bc3e01e84334659d30c29ec0aebcf, type: 2}
+    - Key: 11
+      Value: {fileID: 11400000, guid: d1b503e3d8f982ed29e29f1e5e18fabc, type: 2}
+    - Key: 12
+      Value: {fileID: 11400000, guid: ed6f00cd2e7656337a892ef6eda812a7, type: 2}
+    - Key: 13
+      Value: {fileID: 11400000, guid: 52eaf97859ea0e928a1878c378a16850, type: 2}
+    - Key: 14
+      Value: {fileID: 11400000, guid: a16509d308cdb8a369ab649b6ee2ace8, type: 2}
+    - Key: 15
+      Value: {fileID: 11400000, guid: 3528db799caaa8ef498a3aa7c25f7b24, type: 2}
+    - Key: 16
+      Value: {fileID: 11400000, guid: a1c214e7a9e66ed6eb5e866b09a00b86, type: 2}
+    - Key: 17
+      Value: {fileID: 11400000, guid: 80c4926493020b15ba48587373f313f0, type: 2}
+    - Key: 18
+      Value: {fileID: 11400000, guid: 59271610b5cee07368170dce37d3de62, type: 2}
+    - Key: 19
+      Value: {fileID: 11400000, guid: 506d3a786e30c841fa0932fddcfc6348, type: 2}
+    - Key: 20
+      Value: {fileID: 11400000, guid: f0721ca02b02eca5195f3357a25f7057, type: 2}
+    - Key: 21
+      Value: {fileID: 11400000, guid: 8d329569622b01a04aa48d223835d085, type: 2}
+    - Key: 22
+      Value: {fileID: 11400000, guid: fd71cdc77f1ed423aa34b1536b1142d8, type: 2}
+    - Key: 23
+      Value: {fileID: 11400000, guid: e7b3f3328943211a29fcd725d10a0c68, type: 2}
+    - Key: 24
+      Value: {fileID: 11400000, guid: 44e9ebe49e64d44f2955f2b56c8187d2, type: 2}
+    - Key: 25
+      Value: {fileID: 11400000, guid: f82751ea161df074a9f44e65547188a1, type: 2}
+    - Key: 26
+      Value: {fileID: 11400000, guid: 1c657f764222606e7a638e1a7f780b98, type: 2}
+    - Key: 27
+      Value: {fileID: 11400000, guid: 1f4d8bbab7a08a75e88785fa5237470c, type: 2}
+    - Key: 28
+      Value: {fileID: 11400000, guid: a4157b8a09bc38aebac3be4dd57ddd51, type: 2}
+    - Key: 29
+      Value: {fileID: 11400000, guid: 41fe2e29e7678c41da382f334e28f4bc, type: 2}
+    - Key: 30
+      Value: {fileID: 11400000, guid: 9ce26ab6a19ce2b5e8361868438a72aa, type: 2}
+    - Key: 31
+      Value: {fileID: 11400000, guid: 853b3a443ce65439aa4d58ab05460a64, type: 2}
+    - Key: 32
+      Value: {fileID: 11400000, guid: d0e023887e1c4b59c9f2405c9375b1ad, type: 2}
+    - Key: 33
+      Value: {fileID: 11400000, guid: 1aae05bafeadcd93b92654b70f6dafde, type: 2}
+    - Key: 34
+      Value: {fileID: 11400000, guid: 88deb3d03e2ba2e5ba7f7130aea691aa, type: 2}
+    - Key: 35
+      Value: {fileID: 11400000, guid: 5e46dafcdd71636bc87e0eb5b202270f, type: 2}
+    - Key: 36
+      Value: {fileID: 11400000, guid: 84ffac7efa7a0c8bb9cd0017dad95308, type: 2}
+    - Key: 37
+      Value: {fileID: 11400000, guid: dc251726335c493c2840f96044282361, type: 2}
+    - Key: 38
+      Value: {fileID: 11400000, guid: 2b38746dcd5b71f78b7a25bb90ed20cf, type: 2}
+    - Key: 39
+      Value: {fileID: 11400000, guid: f29e339071950b3759cf80330883039c, type: 2}
+    - Key: 40
+      Value: {fileID: 11400000, guid: 714d8bc7d29d6d01ea7c69d91c73c353, type: 2}
+    - Key: 41
+      Value: {fileID: 11400000, guid: 02a8d6ef78e22f3abad7ca5da139e1c8, type: 2}
+    - Key: 42
+      Value: {fileID: 11400000, guid: 6b1455629acef79e1bd63ab0def88631, type: 2}
+    - Key: 43
+      Value: {fileID: 11400000, guid: 5763c63c6ba99a85885db4cb97cda2b1, type: 2}
+    - Key: 44
+      Value: {fileID: 11400000, guid: bb2a017a1f580f103901fee27c4df80f, type: 2}
+    - Key: 45
+      Value: {fileID: 11400000, guid: deae49be0977be871a5e067139b07a64, type: 2}
+    - Key: 46
+      Value: {fileID: 11400000, guid: 33296487d0bbe181d89292b0e9161ca0, type: 2}
+    - Key: 47
+      Value: {fileID: 11400000, guid: 04d9412b7cdef4218af844c930b329e4, type: 2}
+    - Key: 48
+      Value: {fileID: 11400000, guid: 8f930ba15057693239de78e396a81889, type: 2}
+    - Key: 49
+      Value: {fileID: 11400000, guid: 969302b4a26c099e784081350e9e3edd, type: 2}
+    - Key: 50
+      Value: {fileID: 11400000, guid: e25b88931d089d919854db67232e07d4, type: 2}
+    - Key: 51
+      Value: {fileID: 11400000, guid: 367038349db1857149227ae6ce9421d5, type: 2}
+    - Key: 52
+      Value: {fileID: 11400000, guid: 7d4162b6473063b36822d15a4878a7fa, type: 2}
+    - Key: 53
+      Value: {fileID: 11400000, guid: d95fac3184a9ec0c68d5313e418cb76f, type: 2}
+    - Key: 54
+      Value: {fileID: 11400000, guid: 4f4a92dedfac90c418409087419ca46d, type: 2}
+    - Key: 55
+      Value: {fileID: 11400000, guid: c2cafc08926ffed0aac2b929ba0efe21, type: 2}
+    - Key: 56
+      Value: {fileID: 11400000, guid: a9f7401a0a797541c96113d38cc95d93, type: 2}
+    - Key: 57
+      Value: {fileID: 11400000, guid: a2af7901528314e29b9a8703492062a5, type: 2}
+    - Key: 58
+      Value: {fileID: 11400000, guid: eb7570a7849a1f4e2a66d83989d853c6, type: 2}
+    - Key: 59
+      Value: {fileID: 11400000, guid: cce34d53759fe84dabaa6ef368f61e2a, type: 2}
+    - Key: 60
+      Value: {fileID: 11400000, guid: cbb51aec119231656ad743156185ae8f, type: 2}
+    - Key: 61
+      Value: {fileID: 11400000, guid: 39bdfcf1f1e029a02bbf9d181527e959, type: 2}
+    - Key: 62
+      Value: {fileID: 11400000, guid: a9bbbd76a55f9c3fd9e1d65c49320ef4, type: 2}

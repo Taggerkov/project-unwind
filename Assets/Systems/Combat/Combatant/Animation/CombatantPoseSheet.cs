@@ -13,6 +13,9 @@ namespace Systems.Combat.Combatant.Animation
         // reserved damage/block range (collections 50–59, global IDs 5000–5999).
         [SerializeField] private SerializedDictionary<uint, CombatantPoseCollection> _poses = new();
 
+        [SerializeField] private Pose _defaultPose; // Fallback pose for missing IDs
+        [SerializeField, HideInInspector] private bool _hasDefaultPose;
+
         // ── Damage pose collections (reserved collection IDs 50–54) ───────────────
         // One collection per hit level. Each collection may contain multiple poses
         // (e.g. impact frame at index 0, tumble frame at index 1).
@@ -65,7 +68,7 @@ namespace Systems.Combat.Combatant.Animation
             {
                 var collection = GetDamagePoseCollection((int)(collectionId - DamageCollectionBase));
                 if (collection != null && collection.poses.TryGetValue(poseId, out pose)) return true;
-                pose = default;
+                pose = _defaultPose;
                 return false;
             }
 
@@ -74,7 +77,7 @@ namespace Systems.Combat.Combatant.Animation
             {
                 var collection = GetBlockPoseCollection((int)(collectionId - BlockCollectionBase));
                 if (collection != null && collection.poses.TryGetValue(poseId, out pose)) return true;
-                pose = default;
+                pose = _defaultPose;
                 return false;
             }
 
@@ -82,7 +85,7 @@ namespace Systems.Combat.Combatant.Animation
             if (_poses.TryGetValue(collectionId, out var standard))
                 return standard.poses.TryGetValue(poseId, out pose);
 
-            pose = default;
+            pose = _defaultPose;
             return false;
         }
 
@@ -154,6 +157,17 @@ namespace Systems.Combat.Combatant.Animation
                 return collection.poses.ContainsKey(poseId);
             return false;
         }
+
+        public Pose GetDefaultPose() => _defaultPose;
+
+        public void SetDefaultPose(Pose pose)
+        {
+            _defaultPose = pose;
+            _hasDefaultPose = true;
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+
+        public bool HasDefaultPose() => _hasDefaultPose;
 #endif
     }
 }

@@ -79,10 +79,10 @@ MonoBehaviour:
   CapsuleYOffset: 1
   CapsulePhysicsMaterial: {fileID: 0}
   GroundDetectionExtraDistance: 0
-  MaxStableSlopeAngle: 60
+  MaxStableSlopeAngle: 10
   StableGroundLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 8
   DiscreteCollisionEvents: 0
   StepHandling: 1
   MaxStepHeight: 0.5
@@ -133,6 +133,7 @@ MonoBehaviour:
   <Animator>k__BackingField: {fileID: 7467116355050897679}
   combatantMoveSetDefinition: {fileID: 11400000, guid: b206798aff69f45419f5bc0db19b0373, type: 2}
   combatantPoseSheet: {fileID: 11400000, guid: 22ba644583d80dd4c9fda6f1734044e8, type: 2}
+  audioSheet: {fileID: 11400000, guid: 72059f50875fa3c49859d368f99f383c, type: 2}
   visualRoot: {fileID: 4842272651931866340}
   directionIndicatorRoot: {fileID: 7932057357836609431}
 --- !u!114 &788693065820320130

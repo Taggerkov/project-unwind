@@ -95,7 +95,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
                     break;
                 case 1:
                     EditorGUILayout.Space(6);
-                    DrawIdSection(true, false);
+                    DrawIdSection(true, false, false);
                     EditorGUILayout.Space(6);
                     DrawBakeSection();
                     break;
@@ -203,12 +203,20 @@ namespace Systems.Combat.Combatant.Animation.Editor
             _boneMap = new Dictionary<string, Transform>();
             PoseAnimator.BuildBoneCacheRecursive(_boneMap, _poseAnimator.skeletonRoot, "");
             var defaultPoseBoneData = CaptureBones();
-            _defaultPose = new Pose
+
+            if (_sheet.HasDefaultPose())
             {
-                Bones = defaultPoseBoneData,
-                Hurtboxes = Array.Empty<MinMaxAABB>(),
-                Hitboxes = Array.Empty<MinMaxAABB>(),
-            };
+                _defaultPose = _sheet.GetDefaultPose();
+            }
+            else
+            {
+                _defaultPose = new Pose
+                {
+                    Bones = defaultPoseBoneData,
+                    Hurtboxes = Array.Empty<MinMaxAABB>(),
+                    Hitboxes = Array.Empty<MinMaxAABB>(),
+                };
+            }
         }
 
         private void DrawTabSelection()
@@ -394,7 +402,8 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── ID section ─────────────────────────────────────────────────────────────
 
-        private void DrawIdSection(bool drawBlockSelector = true, bool drawOffsetSelector = true)
+        private void DrawIdSection(bool drawBlockSelector = true, bool drawOffsetSelector = true,
+            bool drawDefaultSetter = true)
         {
             EditorGUILayout.LabelField("Pose ID", EditorStyles.boldLabel);
 
@@ -431,6 +440,26 @@ namespace Systems.Combat.Combatant.Animation.Editor
                 EditorGUILayout.LabelField(
                     exists ? $"ID:  {EffectiveId}   ⚠ already exists — will overwrite" : $"ID:  {EffectiveId}",
                     exists ? _warningStyle : _subtleLabel);
+            }
+
+            if (drawDefaultSetter)
+            {
+                if (!_sheet.HasDefaultPose())
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.HelpBox(
+                        "No default pose found!",
+                        MessageType.Warning);
+                }
+
+                EditorGUILayout.Space(4);
+                if (GUILayout.Button("Save to Default Pose", GUILayout.Height(28)))
+                {
+                    _defaultPose = CapturePose();
+                    _sheet.SetDefaultPose(_defaultPose);
+                    Debug.Log("[PoseBaker] Updated default pose to current character pose and cleared all boxes.");
+                    RemoveBoxes();
+                }
             }
         }
 
@@ -544,7 +573,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
         private void DrawBoxEditSection()
         {
             GUILayout.Label("Box Edit Actions", EditorStyles.boldLabel);
-            
+
             EditorGUILayout.BeginHorizontal();
 
             if (GUILayout.Button("Select Pose", GUILayout.ExpandWidth(false), GUILayout.Height(28)))
@@ -587,18 +616,12 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         private void PreviewPose(uint collectionId, uint poseId)
         {
-            if (_sheet.TryGetPose(collectionId, poseId, out var pose))
-            {
-                PoseAnimator.ApplyPose(_boneMap, pose);
-                _hurtboxes = new List<MinMaxAABB>(pose.Hurtboxes);
-                _hitboxes = new List<MinMaxAABB>(pose.Hitboxes);
-            }
-            else
-            {
-                PoseAnimator.ApplyPose(_boneMap, _defaultPose);
-                _hurtboxes.Clear();
-                _hitboxes.Clear();
-            }
+            _sheet.TryGetPose(collectionId, poseId, out var pose);
+
+            PoseAnimator.ApplyPose(_boneMap, pose);
+            _hurtboxes = new List<MinMaxAABB>(pose.Hurtboxes);
+            _hitboxes = new List<MinMaxAABB>(pose.Hitboxes);
+
 
             ClearSelection();
             SceneView.RepaintAll();
@@ -620,7 +643,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
             ClearSelection();
             SceneView.RepaintAll();
         }
-        
+
         private void RemoveBoxes()
         {
             _hurtboxes.Clear();

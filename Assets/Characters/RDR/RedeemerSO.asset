@@ -20,52 +20,6 @@ MonoBehaviour:
     m_SubObjectType: 
     m_SubObjectGUID: 
     m_EditorAssetChanged: 0
-  cinematicCameraSequences:
-  - sequenceName: SEXOOO
-    totalFrames: 90
-    sequenceAnchor: 2
-    keyframes:
-    - frameIndex: 0
-      interpolationMode: 0
-      localPosition: {x: 1.39, y: 0, z: 0}
-      lookAtOffset: {x: 0, y: 0, z: 0}
-      fieldOfView: 90
-      rollAngle: 0
-    - frameIndex: 0
-      interpolationMode: 0
-      localPosition: {x: 0, y: 0, z: 0}
-      lookAtOffset: {x: 1.53, y: 0, z: 0}
-      fieldOfView: 90
-      rollAngle: 0
-  - sequenceName: JODER ESTO SI ES CINE
-    totalFrames: 90
-    sequenceAnchor: 2
-    keyframes:
-    - frameIndex: 0
-      interpolationMode: 0
-      localPosition: {x: 1.39, y: 0, z: 0}
-      lookAtOffset: {x: 0, y: 0, z: 0}
-      fieldOfView: 90
-      rollAngle: 0
-    - frameIndex: 30
-      interpolationMode: 0
-      localPosition: {x: 0, y: 0, z: 0}
-      lookAtOffset: {x: 1.53, y: 0, z: 0}
-      fieldOfView: 90
-      rollAngle: 0
-  - sequenceName: Manolo
-    totalFrames: 90
-    sequenceAnchor: 2
-    keyframes:
-    - frameIndex: 0
-      interpolationMode: 0
-      localPosition: {x: 1.39, y: 0, z: 0}
-      lookAtOffset: {x: 0, y: 0, z: 0}
-      fieldOfView: 90
-      rollAngle: 0
-    - frameIndex: 30
-      interpolationMode: 0
-      localPosition: {x: 0, y: 0, z: 0}
-      lookAtOffset: {x: 1.53, y: 0, z: 0}
-      fieldOfView: 90
-      rollAngle: 0
+  cpuPersonality: {fileID: 11400000, guid: aa2014dbbe4dd0f459ea74d396142541, type: 2}
+  cpuMoveHintSheet: {fileID: 11400000, guid: 87487d45fcd657a41ae3530513e33cb0, type: 2}
+  cpuDefenceHintSheet: {fileID: 11400000, guid: c0f66b35580f6534195afa6703fd908f, type: 2}

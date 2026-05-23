@@ -6,9 +6,16 @@ namespace Systems.Audio.Contracts
     /// </summary>
     public enum AudioCategory
     {
+        /// <summary>Background music tracks.</summary>
         Music,
+
+        /// <summary>Short gameplay sound effects: hits, footsteps, UI feedback.</summary>
         Sfx,
+
+        /// <summary>Continuous environmental sounds: wind, crowd, room tone.</summary>
         Ambient,
+
+        /// <summary>Character dialogue and voiced lines.</summary>
         Voice
     }
 }

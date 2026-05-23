@@ -6,6 +6,7 @@ MonoImporter:
   defaultReferences:
   - kccSettings: {fileID: 11400000, guid: 4aeca62f28cd9924a83b520ff9fd4b72, type: 2}
   - audioSettings: {fileID: 11400000, guid: c541f661327e8be8580c5cf9922c517e, type: 2}
+  - musicSettings: {fileID: 11400000, guid: 4b066833126e6853aa24448535652663, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

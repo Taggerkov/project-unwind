@@ -12,24 +12,32 @@ namespace Systems.Combat.Combatant.Behaviour
         // ── Inspector-configured initial values ───────────────────────────────────────
 
         [SerializeField, Min(1), Tooltip("Maximum HP for this character.")]
-        private float _maxHP = 10000.0f;
+        private float _maxHP = 500.0f;
         
         [SerializeField] public float fWalkSpeed = 4.5f;
         [SerializeField] public float fWalkAcceleration = 200.0f;
-        [SerializeField] public float bWalkSpeed = 4.5f;
+        [SerializeField] public float bWalkSpeed = 3.5f;
         [SerializeField] public float bWalkAcceleration = 200.0f;
         [SerializeField] public float fDashSpeed = 7.5f;
         [SerializeField] public float fDashInitialSpeed = 10.0f;
         [SerializeField] public float fDashAcceleration = 200.0f;
-        [SerializeField] public float bDashSpeed = 5.0f;
-        [SerializeField] public float bDashJump = 2.5f;
+        [SerializeField] public float bDashSpeed = 4.50f;
+        [SerializeField] public float bDashJump = 1.8f;
+        
+        [SerializeField] public float airFDashSpeed = 11f;
+        [SerializeField] public uint airFDashTicks = 12;
+        [SerializeField] public uint airFDashBurstTicks = 4;
+        [SerializeField] public float airFDashDecayFactor = 0.9f;
+        
+        [SerializeField] public float airBDashSpeed = 5f;
+        [SerializeField] public uint airBDashTicks = 10;
 
         [SerializeField] public float jumpHeight = 6.5f;
-        [SerializeField] public float fJumpDistance = 3.75f;
-        [SerializeField] public float bJumpDistance = 3.0f;
+        [SerializeField] public float fJumpDistance = 4.65f;
+        [SerializeField] public float bJumpDistance = 3.5f;
         [SerializeField] public float gravity = 9.81f;
-        [SerializeField] public float groundFriction = 25f;
-        [SerializeField] public float airFriction = 5f;
+        [SerializeField] public float groundFriction = 35f;
+        [SerializeField] public float airFriction = 2f;
 
         // ── Runtime state (NonSerialized — never shared via the ScriptableObject) ─────
 
@@ -83,7 +91,7 @@ namespace Systems.Combat.Combatant.Behaviour
         // ── Helpers ───────────────────────────────────────────────────────────────────
 
         /// <summary>True when the character has no HP remaining.</summary>
-        public bool IsDead => HP <= 0;
+        public bool ShouldDie => HP <= 0;
 
         /// <summary>HP as a 0–1 fraction, clamped.</summary>
         public float HPFraction => MaxHP > 0 ? Mathf.Clamp01((float)HP / MaxHP) : 0f;
@@ -97,6 +105,11 @@ namespace Systems.Combat.Combatant.Behaviour
             float before = HP;
             HP = Mathf.Max(0, HP - amount);
             return before - HP;
+        }
+
+        public virtual bool IsDead()
+        {
+            return ShouldDie;
         }
     }
 }

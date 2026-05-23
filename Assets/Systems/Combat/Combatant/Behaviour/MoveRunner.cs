@@ -32,6 +32,8 @@ namespace Systems.Combat.Combatant.Behaviour
         private PoseYield _currentPose;
         private int _ticksRemaining;
 
+        private uint _hitIdCounter;
+
         private EButtonInput _entryButton;
         private EDirectionInput _entryDirection;
 
@@ -75,9 +77,27 @@ namespace Systems.Combat.Combatant.Behaviour
         /// </summary>
         public bool HitConfirmed { get; private set; }
 
+        public uint NextHitId() => ++_hitIdCounter;
+
+        public void ClearHitData() => _owner.StateMachine.SetHitData(default);
+
         public void Initialize(CombatantBehaviour owner)
         {
             _owner = owner;
+        }
+
+        public void ResetForNewRound()
+        {
+            _currentMove = null;
+            _script = null;
+            _currentPose = null;
+            IsRunning = false;
+            HitConfirmed = false;
+            _ticksRun = 0;
+            _entryButton = EButtonInput.None;
+            _entryDirection = EDirectionInput.None;
+            EntryInput = default;
+            CurrentInput = default;
         }
 
         // ── Start ──────────────────────────────────────────────────────────────────────

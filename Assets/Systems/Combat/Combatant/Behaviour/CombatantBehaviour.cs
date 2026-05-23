@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using KinematicCharacterController;
 using Reflex.Attributes;
 using Systems.Audio;
-using Systems.Audio.Example;
 using Systems.Combat.Combatant.Animation;
 using Systems.Combat.Combatant.Controller;
 using Systems.Combat.Combatant.StateMachine;
@@ -21,16 +20,13 @@ namespace Systems.Combat.Combatant.Behaviour
     public class CombatantBehaviour : MonoBehaviour, ITickable<CombatManager>
     {
         [Inject] private readonly CombatManager _combatManager;
-        
-        //TODO
-        private AudioTriggerExample _trigger;
-        [Inject] private AudioManager _audioManager;
-        [SerializeField] private AudioEvent audioEvent;
+        [Inject] private readonly GameManager _gameManager;
 
         [field: SerializeField] public KinematicCharacterMotor Motor { get; private set; }
         [field: SerializeField] public PoseAnimator Animator { get; private set; }
         [SerializeField] public CombatantMoveSetDefinition combatantMoveSetDefinition;
         [SerializeField] public CombatantPoseSheet combatantPoseSheet;
+        [SerializeField] public AudioSheet audioSheet;
         [SerializeField] public GameObject visualRoot;
         [SerializeField] public GameObject directionIndicatorRoot;
 
@@ -41,6 +37,8 @@ namespace Systems.Combat.Combatant.Behaviour
 
         public CombatantCharacterController CharacterController;
 
+        public GameManager GameManager => _gameManager;
+
         /// <summary>
         /// Live, per-instance character data (HP, character-specific counters/flags).
         /// Cloned from the move set definition's StatsTemplate at Awake so two
@@ -49,6 +47,9 @@ namespace Systems.Combat.Combatant.Behaviour
         public CombatantStats Stats { get; private set; }
 
         public Action<EFacingDirection> OnFacingDirectionChanged;
+
+        public event Action OnHitstunEnded;
+        public event Action OnBlockstunEnded;
 
 
         private List<CombatantMove> _movementMoves;
@@ -114,9 +115,6 @@ namespace Systems.Combat.Combatant.Behaviour
 
         private void Awake()
         {
-            //TODO
-            _trigger = new AudioTriggerExample(_audioManager, audioEvent);
-            
             CharacterController = new CombatantCharacterController();
             Motor.CharacterController = CharacterController;
 
@@ -130,7 +128,8 @@ namespace Systems.Combat.Combatant.Behaviour
             _runner.Initialize(this);
 
             _runner.OnPoseChanged += OnPoseChanged;
-            _runner.OnMoveFinished += OnMoveEnd;
+            _runner.OnMoveStarted += OnMoveStarted;
+            _runner.OnMoveFinished += OnMoveEnded;
 
             // Clone the stats template so this instance gets its own independent runtime state.
             if (combatantMoveSetDefinition && combatantMoveSetDefinition.StatsTemplate != null)
@@ -143,7 +142,7 @@ namespace Systems.Combat.Combatant.Behaviour
                 Debug.LogWarning($"{name}: no StatsTemplate assigned in MoveSetDefinition. " +
                                  "HP and character-specific data will be unavailable.");
             }
-            
+
             CharacterController.Stats = Stats;
 
             if (combatantMoveSetDefinition)
@@ -229,23 +228,43 @@ namespace Systems.Combat.Combatant.Behaviour
             };
         }
 
+        public void ResetForNewRound()
+        {
+            Stats.Initialize(); //Reset HP and any character-specific stats to their initial values.
+            _stateMachine.ResetForNewRound();
+            _runner.ResetForNewRound();
+        }
+
         private void OnPoseChanged(uint id, uint collectionId, uint poseId)
         {
             if (!combatantPoseSheet || !Animator) return;
-            if (combatantPoseSheet.TryGetPose(collectionId, poseId, out var pose))
-            {
-                Animator.ApplyPose(pose);
-            }
-            else
+            var foundPose = combatantPoseSheet.TryGetPose(collectionId, poseId, out var poseOrDefault);
+            Animator.ApplyPose(poseOrDefault);
+
+
+            if (!foundPose)
             {
                 Debug.LogWarning($"Pose with ID {id} not found in CombatantPoseSheet for combatant {name}.");
             }
         }
 
-        private void OnMoveEnd(CombatantMove move)
+        private void OnMoveStarted(CombatantMove move)
         {
             if (move == _cmnStandToCrouch) _stateMachine.SetPhysical(ECharacterState.Crouching);
             else if (move == _cmnCrouchToStand) _stateMachine.SetPhysical(ECharacterState.Standing);
+        }
+
+        private void OnMoveEnded(CombatantMove move)
+        {
+            if (move == _cmnActHitstun)
+            {
+                NotifyHitstunEnd();
+            }
+
+            if (move == _cmnActBlockstun)
+            {
+                NotifyBlockstunEnd();
+            }
         }
 
         public void SetFacingDirection(EFacingDirection direction)
@@ -281,12 +300,13 @@ namespace Systems.Combat.Combatant.Behaviour
 
         public void LogicTick()
         {
-            var view = new CharacterInputView(Buffer, _stateMachine.FacingDirection);
-
             if (_stateMachine.IsAbleToTurn)
             {
                 SetFacingDirection(GetNewFacingDirectionTowardsOpponent());
             }
+
+
+            var view = new CharacterInputView(Buffer, _stateMachine.FacingDirection);
 
 
             if (_runner.IsRunning)
@@ -778,6 +798,8 @@ namespace Systems.Combat.Combatant.Behaviour
                 Stats.PendingDamagePoseOverrideId = hitResult.HitData.DamagePoseOverrideId;
             }
 
+            if (hitResult.HitData.IsLauncher) CharacterController.ForceUnground(1 * TickManager.TickInterval);
+
             CharacterController.AddVelocity(hitResult.VictimKnockback, EVelocitySpace.World);
 
             // Set combat state before starting the move so CommitType.Neutral
@@ -794,9 +816,6 @@ namespace Systems.Combat.Combatant.Behaviour
         {
             CharacterController.AddVelocity(hitResult.PerpetratorKnockback, EVelocitySpace.World);
             _runner.NotifyDealtHit();
-            
-            //TODO
-            _trigger.Play();
         }
 
         public void NotifyBlocked(HitResult hitResult)
@@ -831,6 +850,15 @@ namespace Systems.Combat.Combatant.Behaviour
         }
 
         public void NotifyAirborne() => _stateMachine.OnBecameAirborne();
-        public void NotifyHitstunEnd() => _stateMachine.OnMoveEnded();
+
+        public void NotifyHitstunEnd()
+        {
+            OnHitstunEnded?.Invoke();
+        }
+
+        public void NotifyBlockstunEnd()
+        {
+            OnBlockstunEnded?.Invoke();
+        }
     }
 }

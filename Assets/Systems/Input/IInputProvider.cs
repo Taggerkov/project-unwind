@@ -5,7 +5,7 @@ namespace Systems.Input
     public enum EInputProviderType
     {
         Player,
-        AI,
+        Cpu,
         Dummy,
         Replay,
         NetworkBuffer,
@@ -22,6 +22,12 @@ namespace Systems.Input
     {
         public EDirectionInput Current;
         public EDirectionInput Previous;
+        
+        public DirectionState(EDirectionInput current, EDirectionInput previous)
+        {
+            Current = current;
+            Previous = previous;
+        }
 
         public bool WasEntered(EDirectionInput dir) => Current == dir && Previous != dir;
         public bool IsHeld(EDirectionInput dir) => Current == dir;
@@ -74,20 +80,16 @@ namespace Systems.Input
         public EInputProviderType ProviderType { get; }
         public InputBuffer Buffer { get; }
 
-        public TickInput Idle()
-        {
-            var input = new TickInput()
-            {
-                Direction = new DirectionState { Current = EDirectionInput.Input5, Previous = EDirectionInput.Input5 }
-            };
-            Buffer.Write(input);
-            return input;
-        }
-
         /// <summary>
         /// Called each tick to know what a specific combatant is trying to do.
         /// </summary>
         /// <returns>The FrameInput with this current tick's information.</returns>
         public TickInput UpdateFrameInput();
+
+        /// <summary>
+        /// Drops any input latched before combat (e.g. menu/Help presses) so the first
+        /// tick starts clean. No-op for providers without buffered physical input.
+        /// </summary>
+        public void Flush() { }
     }
 }

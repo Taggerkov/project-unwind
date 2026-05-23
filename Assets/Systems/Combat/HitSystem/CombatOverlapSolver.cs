@@ -9,6 +9,9 @@ namespace Systems.Combat.HitSystem
         private Dictionary<CombatantBehaviour, MinMaxAABB[]> _hurtboxes = new();
         private Dictionary<CombatantBehaviour, (HitData, MinMaxAABB[])> _hitboxes = new();
 
+        private readonly HashSet<(CombatantBehaviour perpetrator, uint hitId, CombatantBehaviour victim)>
+            _hitRegistry = new();
+
         public void RegisterHurtboxes(CombatantBehaviour combatantBehaviour, MinMaxAABB[] hurtboxes)
         {
             _hurtboxes[combatantBehaviour] = hurtboxes;
@@ -25,54 +28,75 @@ namespace Systems.Combat.HitSystem
             _hitboxes.Clear();
         }
 
+        public void ClearHitRegistry(CombatantBehaviour perpetrator) =>
+            _hitRegistry.RemoveWhere(e => e.perpetrator == perpetrator);
+
         public List<(CombatantBehaviour, HitData, CombatantBehaviour)> Solve()
         {
             var result = new List<(CombatantBehaviour, HitData, CombatantBehaviour)>();
+
             foreach (var hitboxEntry in _hitboxes)
             {
                 var attacker = hitboxEntry.Key;
                 var (hitData, hitboxes) = hitboxEntry.Value;
-                var hitTarget = hitData.HitTarget;
 
                 foreach (var hurtboxEntry in _hurtboxes)
                 {
                     var defender = hurtboxEntry.Key;
                     var hurtboxes = hurtboxEntry.Value;
 
-                    // Check if the hit target matches the defender's relation to the attacker
-                    if (hitTarget == EHitTarget.Any ||
-                        (hitTarget == EHitTarget.Enemy && AreEnemies(attacker, defender)) ||
-                        (hitTarget == EHitTarget.Ally && AreAllies(attacker, defender)))
+                    if (!TargetMatches(hitData.HitTarget, attacker, defender)) continue;
+
+                    // ── Deduplication ────────────────────────────────────────────────
+                    // HitId 0 means the data was set without going through the DSL
+                    // (legacy / accidental). Skip deduplication so nothing silently breaks.
+                    var registryKey = (attacker, hitData.HitId, defender);
+                    if (hitData.HitId != 0 && _hitRegistry.Contains(registryKey)) continue;
+
+                    // ── Overlap check ────────────────────────────────────────────────
+                    bool overlapped = false;
+                    foreach (var hitbox in hitboxes)
                     {
-                        // Check for overlaps between hitboxes and hurtboxes
-                        foreach (var hitbox in hitboxes)
+                        if (overlapped) break;
+                        foreach (var hurtbox in hurtboxes)
                         {
-                            foreach (var hurtbox in hurtboxes)
-                            {
-                                if (hitbox.Overlaps(hurtbox))
-                                {
-                                    result.Add((defender, hitData, attacker));
-                                    break; // Stop checking hurtboxes for this hitbox after the first overlap
-                                }
-                            }
+                            if (!hitbox.Overlaps(hurtbox)) continue;
+                            overlapped = true;
+                            break;
                         }
                     }
+
+                    if (!overlapped) continue;
+
+                    // Register before adding to results so simultaneous Solve() calls
+                    // (if ever parallelised) cannot double-fire the same key.
+                    if (hitData.HitId != 0)
+                        _hitRegistry.Add(registryKey);
+
+                    result.Add((defender, hitData, attacker));
                 }
             }
 
             return result;
         }
 
-        private bool AreEnemies(CombatantBehaviour a, CombatantBehaviour b)
+
+        private static bool TargetMatches(EHitTarget target, CombatantBehaviour attacker, CombatantBehaviour defender)
+            => target switch
+            {
+                EHitTarget.Enemy => AreEnemies(attacker, defender),
+                EHitTarget.Ally => AreAllies(attacker, defender),
+                _ => true
+            };
+
+        private static bool AreEnemies(CombatantBehaviour a, CombatantBehaviour b)
         {
-            // Implement logic to determine if a and b are enemies
-            return a != b; // Placeholder: consider all different combatants as enemies
+            return a != b; // TODO: Placeholder: consider all different combatants as enemies
         }
 
-        private bool AreAllies(CombatantBehaviour a, CombatantBehaviour b)
+        private static bool AreAllies(CombatantBehaviour a, CombatantBehaviour b)
         {
-            // Implement logic to determine if a and b are allies
-            return false; // Placeholder: no allies in this simple implementation
+            return false; // TODO: Placeholder: no allies in this simple implementation
         }
     }
 }

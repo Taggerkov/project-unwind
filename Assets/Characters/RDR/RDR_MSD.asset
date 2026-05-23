@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RDR_MSD
   m_EditorClassIdentifier: Assembly-CSharp::Systems.Combat.Combatant.Behaviour.CombatantMoveSetDefinition
   StatsTemplate:
-    rid: 5252727977712025601
+    rid: 5252728174650327136
   Moves:
     rid: 5252727926539419734
   CmnActStand:
@@ -131,12 +131,9 @@ MonoBehaviour:
         - rid: 5252727994613235793
         - rid: 5252727994613235794
         - rid: 5252727994613235795
-    - rid: 5252727977712025601
-      type: {class: RDRCombatantStats, ns: Characters.RDR, asm: Assembly-CSharp}
-      data:
-        _maxHP: 10000
-        isInBulkwarkStance: 0
-        jumpsUsed: 0
+        - rid: 5252728174650327121
+        - rid: 5252728174650327127
+        - rid: 5252728174650327128
     - rid: 5252727977712025680
       type: {class: Redeemer5AtkP, ns: Characters.RDR, asm: Assembly-CSharp}
       data:
@@ -215,3 +212,65 @@ MonoBehaviour:
         - Conditions:
           - Motion: 18
             Buttons: 1
+    - rid: 5252728174650327121
+      type: {class: RedeemerBDash, ns: Characters.RDR, asm: Assembly-CSharp}
+      data:
+        type: 13
+        characterState: 0
+        hitBlockConditions: 0
+        commitType: 1
+        isFollowupMove: 0
+        inputs:
+        - Conditions:
+          - Motion: 24
+            Buttons: 0
+    - rid: 5252728174650327127
+      type: {class: RedeemerAirBDash, ns: Characters.RDR, asm: Assembly-CSharp}
+      data:
+        type: 13
+        characterState: 2
+        hitBlockConditions: 0
+        commitType: 1
+        isFollowupMove: 0
+        inputs:
+        - Conditions:
+          - Motion: 24
+            Buttons: 0
+    - rid: 5252728174650327128
+      type: {class: RedeemerAirFDash, ns: Characters.RDR, asm: Assembly-CSharp}
+      data:
+        type: 13
+        characterState: 2
+        hitBlockConditions: 0
+        commitType: 1
+        isFollowupMove: 0
+        inputs:
+        - Conditions:
+          - Motion: 25
+            Buttons: 0
+    - rid: 5252728174650327136
+      type: {class: RDRCombatantStats, ns: Characters.RDR, asm: Assembly-CSharp}
+      data:
+        _maxHP: 500
+        fWalkSpeed: 4.5
+        fWalkAcceleration: 200
+        bWalkSpeed: 3.5
+        bWalkAcceleration: 200
+        fDashSpeed: 7.5
+        fDashInitialSpeed: 10
+        fDashAcceleration: 200
+        bDashSpeed: 4.5
+        bDashJump: 1.8
+        airFDashSpeed: 11
+        airFDashTicks: 12
+        airFDashBurstTicks: 4
+        airFDashDecayFactor: 0.9
+        airBDashSpeed: 5
+        airBDashTicks: 10
+        jumpHeight: 6.5
+        fJumpDistance: 4.65
+        bJumpDistance: 3.5
+        gravity: 9.81
+        groundFriction: 35
+        airFriction: 2
+        MaxJumps: 2

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Reflex.Attributes;
 using Systems.Combat;
+using Systems.Combat.Combatant.Behaviour;
 using Systems.Core;
 using Systems.Input;
 using UnityEngine;
@@ -54,9 +55,32 @@ namespace Systems.UI.Dev.InputHistory.Scripts
             }
 
             _combatManager.OnInputProviderChanged += BindToPlayer;
+            _combatManager.OnCombatStarted += OnCombatStarted;
             _combatManager.RegisterTickable(this);
 
             _started = true;
+            
+            Hide();
+        }
+
+        private void OnCombatStarted(CombatantBehaviour c0, CombatantBehaviour c1)
+        {
+            // Clear any existing bindings/history when a new combat starts
+            _p0PlayerInputProvider = null;
+            _p1PlayerInputProvider = null;
+            _p0InputHistory.Clear();
+            _p1InputHistory.Clear();
+            BindToPlayer(CombatantSlot.Combatant0, c0.InputProvider);
+            BindToPlayer(CombatantSlot.Combatant1, c1.InputProvider);
+            Show();
+
+            _combatManager.OnCombatEnded += OnCombatEnded;
+        }
+
+        private void OnCombatEnded()
+        {
+            _combatManager.OnCombatEnded -= OnCombatEnded;
+            Hide();
         }
 
         private void OnEnable()
@@ -135,7 +159,7 @@ namespace Systems.UI.Dev.InputHistory.Scripts
 
         private void BindToPlayer(CombatantSlot slot, IInputProvider provider)
         {
-            if (provider == null)
+            if (provider == null || provider.ProviderType == EInputProviderType.Dummy)
             {
                 switch (slot)
                 {

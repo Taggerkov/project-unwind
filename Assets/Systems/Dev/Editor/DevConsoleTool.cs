@@ -6,7 +6,9 @@ using Reflex.Injectors;
 using Systems.Combat;
 using Systems.Combat.Combatant.Behaviour;
 using Systems.Combat.Combatant.Data;
+using Systems.Common;
 using Systems.Core;
+using Systems.Core.ResourceManagement;
 using Systems.Input;
 using Systems.Stage;
 using Systems.UI.CombatantSelect;
@@ -79,7 +81,7 @@ namespace Systems.Dev.Editor
 
         private bool _injected;
 
-        [MenuItem("Tools/Dev Console")]
+        [MenuItem("Unwind/Runtime/Dev Console")]
         public static void ShowWindow()
         {
             GetWindow<DevConsoleToolWindow>("Dev Console").Show();
@@ -281,7 +283,7 @@ namespace Systems.Dev.Editor
             {
                 if (GUILayout.Button("Begin Combatant Select"))
                 {
-                    _gameManager.BeginCharacterSelect();
+                    _gameManager.BeginCharacterSelect().Forget();
                 }
             }
 
@@ -317,9 +319,14 @@ namespace Systems.Dev.Editor
 
         private async UniTask BeginCombat()
         {
-            var sceneInstance =
-                await Addressables.LoadSceneAsync(_stageData.sceneReference.Path, LoadSceneMode.Additive, false);
-            _gameManager.BeginCombat(sceneInstance, _combatant0Data, _combatant1Data, null, null).Forget();
+            var encounterData = new CombatEncounterData
+            {
+                Combatant0 = ToAssetReference(_combatant0Data),
+                Combatant1 = ToAssetReference(_combatant1Data),
+                Stage = ToAssetReference(_stageData)
+            };
+            
+            await _gameManager.BeginCombat(encounterData, null, null);
         }
 
         #endregion
@@ -460,6 +467,13 @@ namespace Systems.Dev.Editor
         {
             if (GUILayout.Toggle(_selectedTab == index, label, EditorStyles.toolbarButton))
                 _selectedTab = index;
+        }
+        
+        private static AssetReferenceT<T> ToAssetReference<T>(T asset) where T : Object
+        {
+            string path = AssetDatabase.GetAssetPath(asset);
+            string guid = AssetDatabase.AssetPathToGUID(path);
+            return new AssetReferenceT<T>(guid);
         }
     }
 }

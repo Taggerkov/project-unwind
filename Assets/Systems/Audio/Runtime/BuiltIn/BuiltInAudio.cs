@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Systems.Audio.Contracts;
 using Systems.Audio.Runtime.BuiltIn.Internal;
+using Systems.Audio.Shared;
 using UnityEngine;
 
 namespace Systems.Audio.Runtime.BuiltIn
@@ -14,6 +15,9 @@ namespace Systems.Audio.Runtime.BuiltIn
     /// Registered as <see cref="IAudioService"/> in the container.
     /// </summary>
     internal sealed class BuiltInAudio : IAudioService, ICategoryProvider
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        , IAudioDiagnosticsSource
+#endif
     {
         /// <summary>The preloaded clip bank, keyed by Addressables address string.</summary>
         private readonly UnityAudioBank _bank;
@@ -34,7 +38,7 @@ namespace Systems.Audio.Runtime.BuiltIn
         /// Constructs the BuiltIn backend, initialising the clip bank, source pool, and per-category tracking.
         /// </summary>
         /// <param name="settings">Pool and backend configuration.</param>
-        public BuiltInAudio(AudioSettings settings)
+        public BuiltInAudio(Shared.AudioSettings settings)
         {
             _bank = new UnityAudioBank();
             _pool = new UnityAudioPool(settings.PoolSize);
@@ -48,8 +52,8 @@ namespace Systems.Audio.Runtime.BuiltIn
         }
 
         /// <inheritdoc/>
-        public async Task PreloadAsync(string key, CancellationToken cancellationToken = default)
-            => await _bank.PreloadAsync(key, cancellationToken);
+        public UniTask PreloadAsync(string key, CancellationToken cancellationToken = default)
+            => _bank.PreloadAsync(key, cancellationToken);
 
         /// <inheritdoc/>
         public void Unload(string key) => _bank.Unload(key);
@@ -100,7 +104,7 @@ namespace Systems.Audio.Runtime.BuiltIn
         /// <inheritdoc/>
         public void SetCategoryVolume(AudioCategory category, float volume)
         {
-            _categoryVolumes[category] = volume;
+            _categoryVolumes[category] = Mathf.Max(0f, volume);
             foreach (var handle in _activeHandles[category]) handle.ApplyVolume();
         }
 
@@ -110,7 +114,7 @@ namespace Systems.Audio.Runtime.BuiltIn
         /// <inheritdoc/>
         public void SetCategorySpeed(AudioCategory category, float speed)
         {
-            _categorySpeeds[category] = speed;
+            _categorySpeeds[category] = Mathf.Max(0f, speed);
             foreach (var handle in _activeHandles[category]) handle.ApplySpeed();
         }
 
@@ -118,12 +122,34 @@ namespace Systems.Audio.Runtime.BuiltIn
         public float GetCategorySpeed(AudioCategory category) => _categorySpeeds[category];
 
         /// <summary>
+        /// Stops all active handles, disposes the source pool, and releases all cached clips.
+        /// Called by <see cref="AudioManager.Dispose"/> after it drops its own references.
+        /// The backend owns handle termination; <see cref="AudioManager"/> only owns the UUID mapping.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (var list in _activeHandles.Values)
+                for (var i = list.Count - 1; i >= 0; i--) list[i].Stop();
+            _pool.Dispose();
+            _bank.Dispose();
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <inheritdoc/>
+        public bool TryGetStats(out AudioBackendStats stats)
+        {
+            stats = new AudioBackendStats(
+                _pool.ActiveCount, _pool.CreatedCount, _pool.ConfiguredSize, _pool.HasGrown,
+                _bank.CacheCount, _bank.InFlightCount);
+            return true;
+        }
+#endif
+
+        /// <summary>
         /// Callback invoked by <see cref="AudioHandle"/> on release.
-        /// Removes the handle from active tracking.
+        /// O(1): uses the handle's category to target the correct list directly.
         /// </summary>
         private void OnHandleStopped(AudioHandle handle)
-        {
-            foreach (var list in _activeHandles.Values) list.Remove(handle);
-        }
+            => _activeHandles[handle.Category].Remove(handle);
     }
 }

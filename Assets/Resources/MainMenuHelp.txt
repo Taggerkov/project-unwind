@@ -1,0 +1,34 @@
+<size=32><b>About Project Unwind</b></size>
+
+Holy Order (a.k.a. Project Unwind) is a 2.5D fighter made in Unity 6.3. It is highly inspired by Arc System Works games yet aims to be its own. Unfortunately this is a very early build and the main unique features are missing or a work in progress. This is barely a prototype.
+
+<size=27><b>How to Play</b></size>
+
+Best of 3 rounds, 99 seconds each. Drain your opponent to zero health, or be ahead on health when time runs out, to take the round.
+
+<size=27><b>Inputs</b></size>
+
+Listed as Keyboard / Controller. Forward means toward the opponent.
+Move: W A S D / left stick or D-pad
+Light: U / West (X, Square)
+Medium: I / North (Y, Triangle)
+Heavy: O / East (B, Circle)
+Unique: L / South (A, Cross)
+Ability: K / right trigger
+Guard: J / left trigger
+Menus: directions to move, Unique (L / South) to confirm.
+
+<size=27><b>Concepts</b></size>
+
+- Directions use numpad notation, always relative to the opponent (6 toward, 4 away).
+- Combat runs on a fixed 60 Hz tick for deterministic timing.
+- Moves flow through Startup, Active and Recovery, with Hitstun and Blockstun on contact.
+- Moves can cancel into others: neutral, kara, IASA, gatling (on hit or block) and whiff routes.
+- The current fighter, the Redeemer, has walks, crouch, jumps, a forward run, dashes, a normal and a three hit Rekka chain.
+
+<size=27><b>Limitations</b></size>
+
+- Only one character is playable, so matches are mirror only.
+- Signature systems (Stamina and Unique Abilities) are not implemented yet.
+- Stages, audio and UI are placeholder or WIP.
+- Expect missing animations, rough edges and debug values.

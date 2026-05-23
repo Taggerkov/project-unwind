@@ -1,13 +1,13 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace Systems.Audio.Contracts
 {
     /// <summary>
     /// The audio playback interface. Implemented by each backend.
     /// </summary>
-    internal interface IAudioService
+    internal interface IAudioService : IDisposable
     {
         /// <summary>
         /// Loads and caches the clip identified by <paramref name="key"/> ahead of playback.
@@ -15,7 +15,7 @@ namespace Systems.Audio.Contracts
         /// </summary>
         /// <param name="key">Bank lookup key to preload.</param>
         /// <param name="cancellationToken">Token to cancel the load operation.</param>
-        Task PreloadAsync(string key, CancellationToken cancellationToken = default);
+        UniTask PreloadAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Releases the cached clip identified by <paramref name="key"/> from memory.
@@ -62,5 +62,13 @@ namespace Systems.Audio.Contracts
         /// <param name="category">Target category.</param>
         /// <param name="speed">Target speed multiplier.</param>
         void SetCategorySpeed(AudioCategory category, float speed);
+
+        /// <summary>Returns the current master volume for the given category.</summary>
+        /// <param name="category">Target category.</param>
+        float GetCategoryVolume(AudioCategory category);
+
+        /// <summary>Returns the current master speed for the given category.</summary>
+        /// <param name="category">Target category.</param>
+        float GetCategorySpeed(AudioCategory category);
     }
 }

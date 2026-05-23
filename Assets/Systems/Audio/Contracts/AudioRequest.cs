@@ -1,4 +1,5 @@
 using System;
+using Systems.Audio.Shared;
 
 namespace Systems.Audio.Contracts
 {

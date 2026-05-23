@@ -26,6 +26,291 @@ MonoBehaviour:
       Value: {fileID: 11400000, guid: d2a419bbed68efc4896ac8209a271196, type: 2}
     - Key: 2
       Value: {fileID: 11400000, guid: 1c48ab86d3d3d0e40ab697f6c2416531, type: 2}
+  _defaultPose:
+    Bones:
+    - Name: Rig
+      LocalPosition: {x: 0, y: 0, z: 0}
+      LocalRotation: {x: -0.7071068, y: 0, z: 8.6595606e-17, w: 0.7071068}
+      LocalScale: {x: 100, y: 100, z: 100}
+    - Name: Rig/CHARA_ROOT
+      LocalPosition: {x: 0.0000000011920929, y: 0, z: 0.0000000011920929}
+      LocalRotation: {x: 0, y: 0, z: 0.17364822, w: 0.9848078}
+      LocalScale: {x: 0.99999994, y: 0.99999994, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips
+      LocalPosition: {x: 0, y: 0, z: 0.010786637}
+      LocalRotation: {x: -0.69445145, y: -0.027662128, z: -0.023692971, w: 0.71861714}
+      LocalScale: {x: 0.99999994, y: 1, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.L
+      LocalPosition: {x: -0.0009881939, y: 0.0013872742, z: 3.352761e-10}
+      LocalRotation: {x: -0.1133821, y: 0.13351206, z: 0.1423006, w: 0.97420204}
+      LocalScale: {x: 0.99999976, y: 0.99999994, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.L/Knee.L
+      LocalPosition: {x: -5.5879353e-11, y: 0.0041277925, z: -2.7008354e-10}
+      LocalRotation: {x: 0.11701537, y: 0.021113655, z: -0.04737954, w: 0.9917746}
+      LocalScale: {x: 0.99999994, y: 0.99999946, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.L/Knee.L/Ankle.L
+      LocalPosition: {x: -3.7252902e-11, y: 0.00430081, z: -1.5133991e-11}
+      LocalRotation: {x: -0.49772632, y: -0.11798844, z: -0.117132016, w: 0.85125047}
+      LocalScale: {x: 1.0000004, y: 1.0000002, z: 1.0000005}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.L/Knee.L/Ankle.L/Foot.L
+      LocalPosition: {x: -6.480207e-11, y: 0.0015089731, z: 1.8626451e-11}
+      LocalRotation: {x: -0.19608645, y: -0.0000011652877, z: 0.00000028045903, w: 0.98058665}
+      LocalScale: {x: 1.0000001, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.R
+      LocalPosition: {x: 0.0009881936, y: 0.0013872742, z: -7.4505804e-11}
+      LocalRotation: {x: 0.05805851, y: -0.33829862, z: -0.040439453, w: 0.9383752}
+      LocalScale: {x: 0.9999997, y: 1, z: 0.99999976}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.R/Knee.R
+      LocalPosition: {x: 7.4505804e-11, y: 0.0041277925, z: -9.3132255e-12}
+      LocalRotation: {x: 0.003147943, y: -0.021283848, z: 0.0012746005, w: 0.9997677}
+      LocalScale: {x: 0.99999994, y: 0.9999994, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.R/Knee.R/Ankle.R
+      LocalPosition: {x: -2.7939676e-10, y: 0.0043008095, z: -9.313225e-11}
+      LocalRotation: {x: -0.52121377, y: 0.1361248, z: 0.17827931, w: 0.82342136}
+      LocalScale: {x: 1.0000004, y: 1.0000002, z: 1.0000007}
+    - Name: Rig/CHARA_ROOT/Hips/Leg.R/Knee.R/Ankle.R/Foot.R
+      LocalPosition: {x: 1.5975903e-10, y: 0.001508973, z: 7.4505804e-11}
+      LocalRotation: {x: -0.1960865, y: 0.0000010547224, z: -0.0000003000532, w: 0.98058665}
+      LocalScale: {x: 1, y: 0.9999999, z: 0.99999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine
+      LocalPosition: {x: -7.607363e-11, y: 0.000000001259136, z: -1.0539462e-11}
+      LocalRotation: {x: -0.97728807, y: -0.034744307, z: 0.0109263025, w: 0.20876196}
+      LocalScale: {x: 1, y: 1, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001
+      LocalPosition: {x: -9.399983e-11, y: 0.00082865596, z: -1.5599652e-10}
+      LocalRotation: {x: -0.31555375, y: -0.00000011264372, z: 0.00000003600626, w: 0.94890773}
+      LocalScale: {x: 0.99999994, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002
+      LocalPosition: {x: 4.703878e-11, y: 0.0005963435, z: -1.420267e-10}
+      LocalRotation: {x: -0.022054242, y: -0.000000021908491, z: 0.0000000025852347, w: 0.9997568}
+      LocalScale: {x: 1, y: 1.0000001, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003
+      LocalPosition: {x: -3.2718717e-11, y: 0.00082971354, z: -3.777677e-10}
+      LocalRotation: {x: 0.014479429, y: -0.000000007200527, z: -0.0000000029501148, w: 0.9998952}
+      LocalScale: {x: 1, y: 0.99999994, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Neck
+      LocalPosition: {x: 4.5054235e-11, y: 0.002056571, z: -1.1641532e-10}
+      LocalRotation: {x: 0.29566365, y: -0.00000001603382, z: -0.00000006942758, w: 0.9552921}
+      LocalScale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Neck/Head
+      LocalPosition: {x: 8.999446e-11, y: 0.00073168974, z: -3.4749972e-10}
+      LocalRotation: {x: -0.19777212, y: 0.0000000076007085, z: 0.00000004428891, w: 0.98024803}
+      LocalScale: {x: 1, y: 0.99999994, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L
+      LocalPosition: {x: -0.00064747315, y: 0.0010933828, z: 0.00022406645}
+      LocalRotation: {x: -0.22369367, y: -0.099754274, z: 0.56390274, w: 0.78868496}
+      LocalScale: {x: 1, y: 0.99999994, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L
+      LocalPosition: {x: -0.0000000011804513, y: 0.0012652015, z: -1.3504177e-10}
+      LocalRotation: {x: -0.15543482, y: -0.08687913, z: 0.6794872, w: 0.7117508}
+      LocalScale: {x: 1.0000001, y: 0.9999998, z: 0.99999946}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L
+      LocalPosition: {x: 2.0489097e-10, y: 0.002884225, z: -1.6763806e-10}
+      LocalRotation: {x: 0.60874516, y: 0.00006784871, z: 0.07769472, w: 0.7895524}
+      LocalScale: {x: 1.0000004, y: 1.0000004, z: 0.9999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Index.L
+      LocalPosition: {x: 0.0007767694, y: 0.0024691368, z: 0.0008682521}
+      LocalRotation: {x: 0.7684379, y: -0.029072123, z: 0.58011204, w: 0.26856682}
+      LocalScale: {x: 1.0000007, y: 1.0000002, z: 0.9999997}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Index.L/Index.L.001
+      LocalPosition: {x: -8.9406965e-10, y: 0.00042354435, z: -7.4505804e-11}
+      LocalRotation: {x: -0.005080554, y: 0.0036997292, z: 0.58667505, w: 0.8097981}
+      LocalScale: {x: 0.99999994, y: 0.9999999, z: 0.99999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Index.L/Index.L.001/Index.L.002
+      LocalPosition: {x: -6.705522e-10, y: 0.00031593867, z: -2.2351741e-10}
+      LocalRotation: {x: 0.000000008064596, y: 0.000000031682358, z: 0.58866155, w: 0.8083796}
+      LocalScale: {x: 1, y: 0.9999999, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Middle.L
+      LocalPosition: {x: 0.0006047131, y: 0.0026480316, z: 0.0010159507}
+      LocalRotation: {x: 0.77633685, y: 0.021100732, z: 0.5611192, w: 0.28635815}
+      LocalScale: {x: 1.0000006, y: 1.0000002, z: 0.9999995}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Middle.L/Middle.L.001
+      LocalPosition: {x: 5.9604643e-10, y: 0.00042842954, z: 1.862645e-10}
+      LocalRotation: {x: -0.002531358, y: 0.005674129, z: 0.91223663, w: 0.40961662}
+      LocalScale: {x: 1.0000001, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Middle.L/Middle.L.001/Middle.L.002
+      LocalPosition: {x: -2.9802322e-10, y: 0.00031838432, z: -1.3038516e-10}
+      LocalRotation: {x: -0.0000000011641531, y: 0.0000000128056845, z: 0.000000003259629, w: 1}
+      LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Pinky.L
+      LocalPosition: {x: 0.00023457948, y: 0.0029567012, z: 0.001106619}
+      LocalRotation: {x: 0.76826763, y: -0.031065524, z: 0.5810567, w: 0.2667824}
+      LocalScale: {x: 1.0000006, y: 1.0000002, z: 0.99999964}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Pinky.L/Pinky.L.001
+      LocalPosition: {x: 8.1956386e-10, y: 0.00036701155, z: -9.3132255e-12}
+      LocalRotation: {x: -0.005853069, y: 0.0042834273, z: 0.5882753, w: 0.80862826}
+      LocalScale: {x: 0.99999994, y: 1.0000001, z: 0.9999999}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Pinky.L/Pinky.L.001/Pinky.L.002
+      LocalPosition: {x: 6.705522e-10, y: 0.00028851628, z: -4.353933e-10}
+      LocalRotation: {x: -0.000000019619204, y: -0.00000003231399, z: 0.5905664, w: 0.8069891}
+      LocalScale: {x: 0.9999997, y: 0.99999994, z: 0.9999999}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Ring.L
+      LocalPosition: {x: 0.00045762828, y: 0.0027833139, z: 0.0010896011}
+      LocalRotation: {x: 0.74995023, y: -0.11165073, z: 0.6074282, w: 0.23693813}
+      LocalScale: {x: 1.0000007, y: 1, z: 0.99999976}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Ring.L/Ring.L.001
+      LocalPosition: {x: -1.4901161e-10, y: 0.00039585453, z: 4.1909514e-11}
+      LocalRotation: {x: -0.0050562173, y: 0.004433233, z: 0.6572805, w: 0.75361603}
+      LocalScale: {x: 0.99999976, y: 0.99999994, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Ring.L/Ring.L.001/Ring.L.002
+      LocalPosition: {x: 1.4901161e-10, y: 0.00029190927, z: 3.632158e-10}
+      LocalRotation: {x: 0.000000019353173, y: -0.000000004625403, z: 0.6592613, w: 0.75191396}
+      LocalScale: {x: 0.9999998, y: 0.9999999, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Thumb.L
+      LocalPosition: {x: 0.00023227501, y: 0.0023944771, z: 0.0001118891}
+      LocalRotation: {x: 0.8488192, y: 0.32503942, z: 0.31653997, w: 0.2713999}
+      LocalScale: {x: 1.0000002, y: 1.0000001, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Thumb.L/Thumb.L.001
+      LocalPosition: {x: 5.9604643e-10, y: 0.0005052268, z: -3.72529e-10}
+      LocalRotation: {x: 0.051453132, y: 0.23566797, z: 0.038764626, w: 0.9696961}
+      LocalScale: {x: 1.0000001, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Thumb.L/Thumb.L.001/Thumb.L.002
+      LocalPosition: {x: -2.9802322e-10, y: 0.0004648116, z: 2.4214386e-10}
+      LocalRotation: {x: -0.046916183, y: -0.15643151, z: 0.0045094085, w: 0.9865636}
+      LocalScale: {x: 0.99999994, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Wrist.L
+      LocalPosition: {x: 1.4901161e-10, y: 0.0028159048, z: 2.1420418e-10}
+      LocalRotation: {x: 0.69072783, y: 0.51352024, z: 0.27505696, w: 0.4284108}
+      LocalScale: {x: 1.0000001, y: 1.0000005, z: 0.9999999}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.L/Arm.L/Elbow.L/Wrist.L/SHIELD_ATTACH
+      LocalPosition: {x: -0.00048227012, y: 0.00083079276, z: -0.00016304433}
+      LocalRotation: {x: -0.39380032, y: -0.56575286, z: -0.6011753, w: 0.4042688}
+      LocalScale: {x: 1, y: 0.9999999, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R
+      LocalPosition: {x: 0.0006474733, y: 0.0010933828, z: 0.00022406617}
+      LocalRotation: {x: -0.22369379, y: 0.09975443, z: -0.5639028, w: 0.7886849}
+      LocalScale: {x: 0.99999994, y: 0.9999999, z: 0.99999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R
+      LocalPosition: {x: -5.0291415e-10, y: 0.0012652022, z: -5.2154064e-10}
+      LocalRotation: {x: 0.25196615, y: 0.14068854, z: -0.6195725, w: 0.72996557}
+      LocalScale: {x: 0.9999999, y: 0.9999997, z: 0.99999946}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R
+      LocalPosition: {x: 1.6763806e-10, y: 0.002884225, z: 2.2351741e-10}
+      LocalRotation: {x: 0.5391343, y: -0.00007194654, z: -0.0688108, w: 0.83940417}
+      LocalScale: {x: 1, y: 1.0000004, z: 0.9999998}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Index.R
+      LocalPosition: {x: 0.0006752018, y: 0.0021788427, z: 0.0007833205}
+      LocalRotation: {x: -0.19433329, y: 0.13153823, z: -0.9302451, w: 0.28209293}
+      LocalScale: {x: 1.0000001, y: 1.0000006, z: 1.0000006}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Index.R/Index.R.001
+      LocalPosition: {x: 0, y: 0.00042354284, z: 2.9802322e-10}
+      LocalRotation: {x: -0.31887627, y: 0.032682337, z: -0.13757764, w: 0.93718845}
+      LocalScale: {x: 0.99999994, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Index.R/Index.R.001/Index.R.002
+      LocalPosition: {x: -3.352761e-10, y: 0.00031593753, z: -2.2351741e-10}
+      LocalRotation: {x: -0.27102044, y: -0.088823564, z: -0.17079438, w: 0.94312656}
+      LocalScale: {x: 1, y: 0.99999994, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Middle.R
+      LocalPosition: {x: 0.0008798066, y: 0.0023042953, z: 0.0006226327}
+      LocalRotation: {x: 0.27377912, y: 0.12705027, z: -0.92350066, w: 0.23674841}
+      LocalScale: {x: 1, y: 1.0000004, z: 1.0000005}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Middle.R/Middle.R.001
+      LocalPosition: {x: -2.2351741e-10, y: 0.00042842902, z: -0.0000000011920929}
+      LocalRotation: {x: -0.0603235, y: 0.052246578, z: -0.7009178, w: 0.7087635}
+      LocalScale: {x: 1.0000001, y: 0.9999999, z: 0.9999999}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Middle.R/Middle.R.001/Middle.R.002
+      LocalPosition: {x: -2.2351741e-10, y: 0.0003183846, z: -5.3085386e-10}
+      LocalRotation: {x: -0.00000000698492, y: -0.0000000055879363, z: -0.000000011175873, w: 1}
+      LocalScale: {x: 1, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Pinky.R
+      LocalPosition: {x: 0.0010229207, y: 0.00257626, z: 0.00024856962}
+      LocalRotation: {x: 0.10946605, y: -0.001860138, z: -0.91296136, w: 0.3930845}
+      LocalScale: {x: 0.9999999, y: 1.0000006, z: 1.0000008}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Pinky.R/Pinky.R.001
+      LocalPosition: {x: -1.4901161e-10, y: 0.0003670114, z: -0.0000000010058283}
+      LocalRotation: {x: -0.56431925, y: -0.1396512, z: -0.28097153, w: 0.7636075}
+      LocalScale: {x: 1.0000001, y: 1.0000002, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Pinky.R/Pinky.R.001/Pinky.R.002
+      LocalPosition: {x: 5.9604643e-10, y: 0.00028851628, z: -3.72529e-10}
+      LocalRotation: {x: -0.000000012284436, y: 0.000000018899131, z: -0.16925806, w: 0.98557174}
+      LocalScale: {x: 1.0000001, y: 0.9999999, z: 1.0000001}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Ring.R
+      LocalPosition: {x: 0.0010023224, y: 0.0024050388, z: 0.00047298474}
+      LocalRotation: {x: 0.096218504, y: 0.17884843, z: -0.9433816, w: 0.26227173}
+      LocalScale: {x: 0.99999994, y: 1.0000006, z: 1.0000007}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Ring.R/Ring.R.001
+      LocalPosition: {x: -2.9802322e-10, y: 0.00039585447, z: -0.0000000013038516}
+      LocalRotation: {x: 0.052241005, y: 0.40501696, z: -0.27438146, w: 0.87060153}
+      LocalScale: {x: 0.9999999, y: 1, z: 0.99999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Ring.R/Ring.R.001/Ring.R.002
+      LocalPosition: {x: 2.4214386e-10, y: 0.00029190967, z: 4.0978193e-10}
+      LocalRotation: {x: -0.0000000069271935, y: -0.0000000014843986, z: -0.3380974, w: 0.94111115}
+      LocalScale: {x: 1, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Thumb.R
+      LocalPosition: {x: -0.00004270982, y: 0.0023744032, z: 0.00021719828}
+      LocalRotation: {x: -0.7852898, y: -0.1574303, z: 0.59851754, w: 0.017669844}
+      LocalScale: {x: 1.0000008, y: 1.0000004, z: 1.0000004}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Thumb.R/Thumb.R.001
+      LocalPosition: {x: 5.0291415e-10, y: 0.00050522626, z: 1.11758706e-10}
+      LocalRotation: {x: -0.16708007, y: 0.040235493, z: 0.18361384, w: 0.96785915}
+      LocalScale: {x: 1, y: 1, z: 1}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Thumb.R/Thumb.R.001/Thumb.R.002
+      LocalPosition: {x: -0.0000000011734664, y: 0.00046481253, z: -1.4901161e-10}
+      LocalRotation: {x: -0.15458411, y: 0.33742684, z: 0.27526122, w: 0.886836}
+      LocalScale: {x: 1, y: 0.9999999, z: 0.99999994}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Wrist.R
+      LocalPosition: {x: 2.6077032e-10, y: 0.0028159027, z: 0}
+      LocalRotation: {x: 0.30279273, y: -0.10646727, z: -0.7806758, w: 0.536215}
+      LocalScale: {x: 1, y: 1.0000004, z: 1.0000008}
+    - Name: Rig/CHARA_ROOT/Hips/Spine/Spine.001/Spine.002/Spine.003/Shoulder.R/Arm.R/Elbow.R/Wrist.R/WEAP_ATTACH
+      LocalPosition: {x: 0.00017418846, y: 0.0008210937, z: -0.00006765082}
+      LocalRotation: {x: -0.2517354, y: -0.000000014901161, z: -0.6481813, w: 0.7186726}
+      LocalScale: {x: 1, y: 1, z: 1}
+    - Name: Rig/SHIELD_ROOT
+      LocalPosition: {x: -0.0030821897, y: -0.0026576486, z: 0.01180906}
+      LocalRotation: {x: -0.22074382, y: -0.08354668, z: 0.8635972, w: 0.44552445}
+      LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000002}
+    - Name: Rig/SHIELD_ROOT/DEF_Handle
+      LocalPosition: {x: 5.9604643e-10, y: -2.7939676e-10, z: 3.5390257e-10}
+      LocalRotation: {x: 0.0000000074505815, y: 0.0000000018626454, z: -0.0000000093132275, w: 1}
+      LocalScale: {x: 1, y: 1, z: 1}
+    - Name: Rig/SHIELD_ROOT/DEF_Handle/DEF_ShieldMiddle
+      LocalPosition: {x: 7.45058e-10, y: 0.00069508073, z: 0.0000000010803342}
+      LocalRotation: {x: -0.00000025073513, y: 0.7077183, z: -0.7064948, w: -0.00000014834568}
+      LocalScale: {x: 0.9842194, y: 1.0323246, z: 0.9842194}
+    - Name: Rig/SHIELD_ROOT/DEF_Handle/DEF_ShieldUpper
+      LocalPosition: {x: 7.45058e-10, y: 0.00069508073, z: 0.0000000010803342}
+      LocalRotation: {x: 0.49930406, y: 0.5006951, z: 0.49930403, w: 0.50069493}
+      LocalScale: {x: 0.9999999, y: 1, z: 0.9999998}
+    - Name: Rig/WEAP_ROOT
+      LocalPosition: {x: 0.0032224243, y: -0.0016908696, z: 0.011754649}
+      LocalRotation: {x: -0.25348967, y: -0.10968499, z: 0.033112302, w: 0.9605289}
+      LocalScale: {x: 1.0000002, y: 1.0000002, z: 1.0000001}
+    - Name: Rig/WEAP_ROOT/DEF_WEAP_Handle
+      LocalPosition: {x: 3.9115547e-10, y: -1.6996636e-10, z: -8.9406965e-10}
+      LocalRotation: {x: -0.00000003181412, y: -0.7071069, z: -0.7071067, w: -0.000000030003115}
+      LocalScale: {x: 1, y: 0.99999976, z: 1}
+    - Name: Rig/WEAP_ROOT/DEF_WEAP_Handle/DEF_Chain
+      LocalPosition: {x: 3.1664968e-10, y: 0.004635091, z: 5.2270477e-10}
+      LocalRotation: {x: 0.410637, y: -0.00000005960465, z: -0.57069224, w: 0.71111727}
+      LocalScale: {x: 1.0360007, y: 0.9317082, z: 1.0360007}
+    - Name: Rig/WEAP_ROOT/DEF_WEAP_Handle/DEF_Chain/DEF_Chain.001
+      LocalPosition: {x: -4.1909515e-10, y: 0.0025613043, z: 1.0244548e-10}
+      LocalRotation: {x: 0.39227432, y: 0.0014450476, z: -0.28589782, w: 0.874289}
+      LocalScale: {x: 0.91967916, y: 1.1622862, z: 0.9424147}
+    - Name: Rig/WEAP_ROOT/DEF_WEAP_Handle/DEF_Chain/DEF_Chain.001/DEF_Chain.002
+      LocalPosition: {x: -9.778887e-11, y: 0.0033963951, z: -9.313225e-11}
+      LocalRotation: {x: 0.26120552, y: -0.00020947354, z: -0.031603094, w: 0.9647657}
+      LocalScale: {x: 1.2698811, y: 0.66318744, z: 1.2110735}
+    - Name: Rig/WEAP_ROOT/DEF_WEAP_Handle/DEF_Chain/DEF_Chain.001/DEF_Chain.002/DEF_Chain.003
+      LocalPosition: {x: 8.8475643e-11, y: 0.003396396, z: -2.2351741e-10}
+      LocalRotation: {x: -0.2846118, y: -0.0015850813, z: 0.3193581, w: 0.9038828}
+      LocalScale: {x: 1.0390898, y: 1.1402059, z: 0.99458843}
+    - Name: Rig/WEAP_ROOT/DEF_WEAP_Handle/DEF_Chain/DEF_Chain.001/DEF_Chain.002/DEF_Chain.003/DEF_Morning_Star
+      LocalPosition: {x: 7.1479006e-10, y: 0.0033963947, z: 9.313225e-11}
+      LocalRotation: {x: -0.000000003725291, y: 0.0000000018626456, z: 0.00000002328307, w: 1}
+      LocalScale: {x: 0.9999999, y: 0.9999999, z: 0.9999999}
+    Hurtboxes:
+    - Min:
+        x: -0.25
+        y: 0
+        z: -0.35
+      Max:
+        x: 0.25
+        y: 1.8
+        z: 0.35
+    Hitboxes: []
+  _hasDefaultPose: 1
   _level1DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
   _level2DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}
   _level3DamagePoses: {fileID: 11400000, guid: 4491f8707b2216b44a29402227ab3559, type: 2}

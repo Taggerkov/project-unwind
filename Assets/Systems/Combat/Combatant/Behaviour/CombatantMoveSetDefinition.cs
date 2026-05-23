@@ -17,7 +17,7 @@ namespace Systems.Combat.Combatant.Behaviour
         /// CombatantBehaviour clones it at Awake so each instance gets independent state.
         /// Must be set; combat will not start correctly without it.
         /// </summary>
-        [SerializeReference, TypeSelector(false)]
+        [SerializeReference, TypeSelector]
         public CombatantStats StatsTemplate;
 
         [SerializeReference] public CombatantMoveList Moves = new();

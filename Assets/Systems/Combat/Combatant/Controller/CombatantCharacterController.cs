@@ -59,6 +59,16 @@ namespace Systems.Combat.Combatant.Controller
         {
             _freeVelocity.x = Mathf.Clamp(_freeVelocity.x, -maxSpeed, maxSpeed);
         }
+        
+        /// <summary>
+        /// Multiplies freeVelocity.x by <paramref name="factor"/> in place.
+        /// Use for exponential velocity decay: e.g. ScaleFreeVelocityX(0.9f) each tick
+        /// mirrors ArcSys' velocityXPercentEachFrame: 90.
+        /// </summary>
+        public void ScaleFreeVelocityX(float factor)
+        {
+            _freeVelocity.x *= factor;
+        }
 
 // Expose friction override for per-move custom friction (e.g. during a dash)
         public void SetFrictionScale(float scale)

@@ -70,6 +70,21 @@ namespace Systems.Combat.Combatant.StateMachine
         /// </summary>
         public EJumpType JumpType { get; private set; } = EJumpType.Neutral;
 
+        public void ResetForNewRound()
+        {
+            CharacterState = ECharacterState.Standing;
+            CombatState = ECombatState.Neutral;
+            ActiveMove = null;
+            LastMove = null;
+            HitData = default;
+            IsTurningEnabled = true;
+            FacingDirection = EFacingDirection.Right;
+            IsKaraCancelWindowOpen = false;
+            IsKaraCancelOverriden = false;
+            IASAEnabled = false;
+            JumpType = EJumpType.Neutral;
+        }
+
         public void SetFacingDirection(EFacingDirection direction)
         {
             if (FacingDirection != direction)

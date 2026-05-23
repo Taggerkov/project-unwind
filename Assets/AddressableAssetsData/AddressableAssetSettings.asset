@@ -15,12 +15,12 @@ MonoBehaviour:
   m_DefaultGroup: 2a7febe2f3a48ef44a1404a13bbe3fff
   m_currentHash:
     serializedVersion: 2
-    Hash: f3196eea3ea1bbab2fd94d5c45193147
+    Hash: 3d19676fa1d2fb48b990e07cc53e21f5
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
-  m_CatalogRequestsTimeout: 0
+  m_CatalogRequestsTimeout: 30
   m_DisableCatalogUpdateOnStart: 0
-  m_InternalIdNamingMode: 0
+  m_InternalIdNamingMode: 2
   m_InternalBundleIdMode: 1
   m_AssetLoadMode: 0
   m_BundledAssetProviderType:
@@ -36,19 +36,19 @@ MonoBehaviour:
   m_AllowNestedBundleFolders: 0
   m_CCDEnabled: 0
   m_maxConcurrentWebRequests: 3
-  m_UseUWRForLocalBundles: 0
-  m_BundleTimeout: 0
+  m_UseUWRForLocalBundles: 1
+  m_BundleTimeout: 10
   m_BundleRetryCount: 0
   m_BundleRedirectLimit: -1
   m_SharedBundleSettings: 0
   m_SharedBundleSettingsCustomGroupIndex: 0
   m_simulatedLoadDelay: 0.1
   m_ContiguousBundles: 1
-  m_StripUnityVersionFromBundleBuild: 0
+  m_StripUnityVersionFromBundleBuild: 1
   m_DisableVisibleSubAssetRepresentations: 0
-  m_BuiltInBundleNaming: 0
+  m_BuiltInBundleNaming: 1
   mBuiltInBundleCustomNaming: 
-  m_MonoScriptBundleNaming: 0
+  m_MonoScriptBundleNaming: 1
   m_CheckForContentUpdateRestrictionsOption: 0
   m_MonoScriptBundleCustomNaming: 
   m_RemoteCatalogBuildPath:
@@ -103,9 +103,10 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - RDR
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
-  - {fileID: 11400000, guid: 7d0aaf138577ba64198161ecb1b81cef, type: 2}
+  - {fileID: 11400000, guid: 484e1b5803a36956485ab1ac5b86be73, type: 2}
   m_InitializationObjects: []
   m_CertificateHandlerType:
     m_AssemblyName: 

@@ -106,7 +106,8 @@ Blocking incurs block-stun proportional to the blocked move. Chip damage applies
 ### Hit Levels
 
 Five hit levels (1 through 5). Higher levels deal more hit-stun, larger knockback, and trigger higher-tier damage poses.
-Hit level is set per move in `HitData` and determines clash resolution when two hitboxes collide simultaneously.
+Hit level is set per move in `HitData` and governs the reaction, not clash priority: when two hitboxes connect on the
+same tick, both land (a trade). Timing decides everything else, since whichever move goes active first hits first.
 
 ---
 
@@ -399,7 +400,7 @@ Deliverables:
 - Gatling cancel and IASA exit windows resolving correctly on hit and block
 - Kara-cancel window functional at move startup
 - `BeginActiveState()` hitbox windows tick-aligned to pose yields
-- `CombatOverlapSolver` resolving simultaneous hitbox collisions by hit level
+- `CombatOverlapSolver` resolving hitbox/hurtbox overlaps each tick, deduplicated per attack so reciprocal overlaps trade
 - Stamina depletion and Stamina Break state functional
 
 ### Milestone 3 – Playable Core
@@ -414,7 +415,7 @@ Deliverables:
 - Round and set flow: KO detection, win screen, rematch
 - All menus navigable by gamepad only, no cursor
 - Audio integrated: SFX on hit and block, music looped per scene
-- AI opponent: FSM-based input provider covering approach, attack, and block-on-hit-confirm (satisfies course topic 7)
+- AI opponent: priority state-machine input provider covering reposition, attack, and reactive guard on detected threats (satisfies course topic 7)
 - WebGL build passing and hosted on GitHub Pages
 - YouTube demonstration video (~2 minutes) recorded and linked in README
 - README complete: all six blog post links, third-party asset and code credits

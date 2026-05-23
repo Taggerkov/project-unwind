@@ -1,17 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using KinematicCharacterController;
 using Reflex.Attributes;
+using Systems.Audio;
 using Systems.Combat.Combatant.Behaviour;
 using Systems.Combat.Combatant.Data;
 using Systems.Combat.HitSystem;
 using Systems.Core;
+using Systems.Core.ResourceManagement;
+using Systems.CPU;
 using Systems.Input;
 using Systems.Stage;
+using Systems.UI.Combat;
 using Systems.UI.Dev.CollisionVisualizer;
 using Unity.Mathematics.Geometry;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using _kccSystem = KinematicCharacterController.KinematicCharacterSystem;
 using Object = UnityEngine.Object;
@@ -30,6 +37,8 @@ namespace Systems.Combat
         [Inject] private readonly TickManager _tickManager;
         [Inject] private readonly KCCSettings _kccSettings;
         [Inject] private readonly CollisionVisualizer _collisionVisualizer;
+        [Inject] private readonly AudioManager _audioManager;
+        [Inject] private readonly CombatUIController _uiController;
 
         private readonly CombatOverlapSolver _combatOverlapSolver = new();
 
@@ -46,20 +55,38 @@ namespace Systems.Combat
         public event Action<CombatantBehaviour, CombatantBehaviour> OnCombatStarted;
         public event Action OnCombatEnded;
 
+        public event Action<HitResult> OnHitResolved;
+
+        private uint _firstToWinRounds = 2; // Best of 3
+
+        #region Runtime Data
 
         private bool _combatInProgress;
 
-        private async UniTask SetCombatants(CombatantDataSO combatant0Data, CombatantDataSO combatant1Data)
-        {
-            var combatant0Handle = combatant0Data.combatantPrefabReference.InstantiateAsync();
-            var combatant1Handle = combatant1Data.combatantPrefabReference.InstantiateAsync();
 
-            //Wait for both combatants to finish loading
-            await UniTask.WhenAll(combatant0Handle.ToUniTask(), combatant1Handle.ToUniTask());
+        public float RoundTimer { get; private set; } = 99f;
+        private uint _combatant0RoundsWon;
+        private uint _combatant1RoundsWon;
 
-            Combatant0Behaviour = combatant0Handle.Result.GetComponent<CombatantBehaviour>();
-            Combatant1Behaviour = combatant1Handle.Result.GetComponent<CombatantBehaviour>();
-        }
+        #endregion
+
+
+        // ── Hitstop ───────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Remaining game ticks to freeze. Decremented at the top of LogicTick.
+        /// During hitstop: combatant logic, collision, and KCC are all skipped.
+        /// Camera shake and LateUpdate systems are unaffected (they run in real time).
+        /// </summary>
+        private uint _hitstopFramesRemaining;
+
+        /// <summary>
+        /// Freezes all gameplay logic for <paramref name="frames"/> ticks.
+        /// Overlapping calls keep the longest remaining duration — a weaker hit
+        /// landing during a strong hit's hitstop will never cut it short.
+        /// </summary>
+        public void TriggerHitstop(uint frames)
+            => _hitstopFramesRemaining = (uint)Mathf.Max(_hitstopFramesRemaining, frames);
 
         private void SetInputProviders(IInputProvider combatant0InputProvider, IInputProvider combatant1InputProvider)
         {
@@ -141,14 +168,28 @@ namespace Systems.Combat
             };
         }
 
-        public async UniTask PrepareCombat(SceneInstance sceneInstance, CombatantDataSO combatant0Data,
-            IInputProvider combatant0InputProvider,
-            CombatantDataSO combatant1Data, IInputProvider combatant1InputProvider)
+        public async UniTask PrepareCombat(CombatSession session,
+            IInputProvider combatant0InputProvider, IInputProvider combatant1InputProvider)
         {
-            await sceneInstance.ActivateAsync().ToUniTask();
-            await SetCombatants(combatant0Data, combatant1Data);
-            SetInputProviders(combatant0InputProvider, combatant1InputProvider);
-            PositionCombatants();
+            await session.ActivateSceneAsync();
+
+            Combatant0Behaviour = session.Combatant0;
+            Combatant1Behaviour = session.Combatant1;
+
+            var c0Provider = combatant0InputProvider;
+            var c1Provider = combatant1InputProvider;
+
+            if (combatant1InputProvider == null || combatant1InputProvider.ProviderType == EInputProviderType.Dummy)
+            {
+                c1Provider = new CpuInputProvider(Combatant1Behaviour, Combatant0Behaviour, session.Combatant1Data.cpuPersonality,
+                    session.Combatant1Data.cpuMoveHintSheet, session.Combatant1Data.cpuDefenceHintSheet);
+            }
+
+            await _audioManager.PreloadAsync(
+                Combatant0Behaviour.audioSheet.AudioEvents.Values.Concat(Combatant1Behaviour.audioSheet.AudioEvents
+                    .Values));
+
+            SetInputProviders(c0Provider, c1Provider);
         }
 
         public void StartCombat()
@@ -160,13 +201,116 @@ namespace Systems.Combat
                 $"Combatant 1: {Combatant1Behaviour.gameObject.name} ProviderType: {Combatant1Behaviour.InputProvider?.ProviderType.ToString() ?? "Null"}\n";
             Debug.Log(str);
 
+            // Discard anything latched before the round (e.g. Help-pane scroll presses).
+            Combatant0Behaviour.InputProvider?.Flush();
+            Combatant1Behaviour.InputProvider?.Flush();
+
             _combatInProgress = true;
+
+            Combatant0Behaviour.Runner.OnMoveStarted +=
+                _ => _combatOverlapSolver.ClearHitRegistry(Combatant0Behaviour);
+            Combatant1Behaviour.Runner.OnMoveStarted +=
+                _ => _combatOverlapSolver.ClearHitRegistry(Combatant1Behaviour);
+
+            _uiController.Show(); //<- This initializes the UI, so it must be called before any events are triggered.
+
+            StartRound();
+
             OnCombatStarted?.Invoke(Combatant0Behaviour, Combatant1Behaviour);
+        }
+
+        private void EndCombat()
+        {
+            _combatInProgress = false;
+            _uiController.Hide();
+            _collisionVisualizer.Hide();
+
+            OnCombatEnded?.Invoke();
+        }
+
+        private void StartRound()
+        {
+            RoundTimer = 99f;
+            Combatant0Behaviour.ResetForNewRound();
+            Combatant1Behaviour.ResetForNewRound();
+
+            _uiController.ResetForNewRound();
+
+            PositionCombatants();
+        }
+
+        private void RoundEnd()
+        {
+            if (_combatant0RoundsWon == _firstToWinRounds)
+            {
+                EndCombat();
+            }
+            else if (_combatant1RoundsWon == _firstToWinRounds)
+            {
+                EndCombat();
+            }
+            else
+            {
+                StartRound();
+            }
+        }
+
+        private void RoundTimeout()
+        {
+            Debug.Log("Round timer expired!");
+
+            float c0HP = Combatant0Behaviour.Stats.HPFraction;
+            float c1HP = Combatant1Behaviour.Stats.HPFraction;
+
+            if (c0HP > c1HP)
+            {
+                _combatant0RoundsWon++;
+                Debug.Log("Combatant 0 wins by timeout!");
+            }
+            else if (c1HP > c0HP)
+            {
+                _combatant1RoundsWon++;
+                Debug.Log("Combatant 1 wins by timeout!");
+            }
+            else
+            {
+                _combatant0RoundsWon++;
+                Debug.Log("Combatant 0 wins by timeout!");
+            }
+
+            RoundEnd();
+        }
+
+        private bool CheckForCombatantDeaths()
+        {
+            if (Combatant0Behaviour.Stats.IsDead())
+            {
+                _combatant1RoundsWon++;
+                Debug.Log("Combatant 1 wins the round!");
+
+                RoundEnd();
+                return true;
+            }
+            else if (Combatant1Behaviour.Stats.IsDead())
+            {
+                _combatant0RoundsWon++;
+                Debug.Log("Combatant 0 wins the round!");
+
+                RoundEnd();
+                return true;
+            }
+
+            return false;
         }
 
         public void RegisterTickable(ITickable<CombatManager> tickable)
         {
             _tickables.Add(tickable);
+        }
+
+        public void UnregisterTickable(ITickable<CombatManager> tickable)
+        {
+            _tickables.Remove(tickable);
         }
 
         public void RegisterHurtboxes(CombatantBehaviour combatantBehaviour, MinMaxAABB[] hurtbox)
@@ -207,11 +351,20 @@ namespace Systems.Combat
         {
             if (!_combatInProgress) return;
 
+
+            if (_hitstopFramesRemaining > 0)
+            {
+                // Skip all logic while hitstop is active.
+                _hitstopFramesRemaining--;
+                return;
+            }
+
             _combatOverlapSolver.ClearFramedata();
             _collisionVisualizer.Clear();
 
             Combatant0Behaviour.LogicTick();
             Combatant1Behaviour.LogicTick();
+
 
             foreach (var tickable in _tickables)
             {
@@ -245,13 +398,22 @@ namespace Systems.Combat
                     case EHitResolution.Hit:
                         defender.NotifyGotHit(hitResult);
                         attacker.NotifyDealtHit(hitResult);
+                        TriggerHitstop(hitData.HitstopDurationOnHit);
                         break;
                     case EHitResolution.Blocked:
                         defender.NotifyBlocked(hitResult);
                         attacker.NotifyGotBlocked(hitResult);
+                        TriggerHitstop(hitData.HitstopDurationOnBlock);
                         break;
                 }
+
+                OnHitResolved?.Invoke(hitResult);
             }
+
+            if (CheckForCombatantDeaths()) return;
+
+
+            if (_hitstopFramesRemaining > 0) return; //Don't run the simulation if we triggered hitstop this frame.
 
             if (_kccSettings.Interpolate)
             {
@@ -264,6 +426,26 @@ namespace Systems.Combat
             {
                 _kccSystem.PostSimulationInterpolationUpdate(TickManager.TickInterval);
             }
+
+            RoundTimer -= TickManager.TickInterval;
+            _uiController.LogicTick();
+
+            if (RoundTimer <= 0)
+            {
+                RoundTimeout();
+            }
+        }
+
+        public void Cleanup()
+        {
+            Combatant0Behaviour = null;
+            Combatant1Behaviour = null;
+
+            // Reset match-level counters so the next session starts clean.
+            _combatant0RoundsWon = 0;
+            _combatant1RoundsWon = 0;
+            _hitstopFramesRemaining = 0;
+            _combatInProgress = false;
         }
     }
 }

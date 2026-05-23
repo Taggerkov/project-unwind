@@ -8,9 +8,11 @@ namespace Systems.Audio.Runtime.BuiltIn
     internal interface ICategoryProvider
     {
         /// <summary>Returns the current volume multiplier for the given category.</summary>
+        /// <param name="category">The category to query.</param>
         float GetCategoryVolume(AudioCategory category);
 
         /// <summary>Returns the current speed multiplier for the given category.</summary>
+        /// <param name="category">The category to query.</param>
         float GetCategorySpeed(AudioCategory category);
     }
 }

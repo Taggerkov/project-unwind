@@ -92,7 +92,7 @@ namespace Systems.Combat.Combatant.Behaviour
         [SerializeField] private EHitBlockConditions hitBlockConditions = EHitBlockConditions.NotHitOrBlockstun;
 
         [SerializeField] private EMoveCommitType commitType = EMoveCommitType.Active;
-        
+
         [SerializeField] private bool isFollowupMove = false;
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Systems.Combat.Combatant.Behaviour
 
         /// <summary>Defines under what hit/blockstun conditions this move may be entered.</summary>
         public EHitBlockConditions HitBlockConditions => hitBlockConditions;
-        
+
         /// <summary>
         /// When true, this move won't be considered as a candidate for move entering. Only when specifically added as a gatling/whiff cancel option from another move.
         /// </summary>
@@ -366,10 +366,24 @@ namespace Systems.Combat.Combatant.Behaviour
         /// <summary>Disallows the MoveRunner from modifying the state of the Kara-Cancel window.</summary>
         protected void OverrideKaraCancelWindow() => Owner.Runner.OverrideKaraCancel(true);
 
-        protected void SetHitData(HitData hitData) => Owner.Runner.SetHitData(hitData);
-
         protected void OnNegativeEdge(Action handler) => Owner.Runner.RegisterNegativeEdge(handler);
         protected uint GetMoveId<TMoveName>() => Owner.GetMoveId(typeof(TMoveName).Name);
+
+        // ── DSL: Hit data ──────────────────────────────────────────────────────────────
+
+        protected void SetHitData(HitData hitData)
+        {
+            hitData.HitId = Owner.Runner.NextHitId();
+            Owner.Runner.SetHitData(hitData);
+        }
+
+        protected HitScope Hit(HitData hitData)
+        {
+            hitData.HitId = Owner.Runner.NextHitId();
+            Owner.Runner.SetHitData(hitData);
+            return new HitScope(Owner.Runner);
+        }
+
 
         // ── DSL: Input access (character space) ───────────────────────────────────────
 
@@ -428,8 +442,8 @@ namespace Systems.Combat.Combatant.Behaviour
 
         /// <summary>Make the character interruptible by ANY action from this point onward.</summary>
         protected void EnableIASA() => Owner.Runner.SetIASA(true);
-        
-        
+
+
         // ── DSL: State notifications ────────────────────────────────────────────────────
         protected void BecomeAirborne() => Owner.NotifyAirborne();
 
@@ -444,8 +458,12 @@ namespace Systems.Combat.Combatant.Behaviour
 
         protected void AddVelocity(Vector3 velocity, EVelocitySpace space = EVelocitySpace.Character)
             => Owner.CharacterController.AddVelocity(velocity, space);
-        
-        protected void ForceUnground(int ticksUngrounded = 1) => Owner.CharacterController.ForceUnground(ticksUngrounded * TickManager.TickInterval);
+
+        protected void ScaleFreeVelocityX(float factor)
+            => Owner.CharacterController.ScaleFreeVelocityX(factor);
+
+        protected void ForceUnground(int ticksUngrounded = 1) =>
+            Owner.CharacterController.ForceUnground(ticksUngrounded * TickManager.TickInterval);
 
         // Physics overrides — all automatically cleaned up on move exit
         // via ResetPhysicsOverrides() called in MoveRunner.Finish()
@@ -459,10 +477,16 @@ namespace Systems.Combat.Combatant.Behaviour
         protected void DisableGravity()
             => Owner.CharacterController.DisableGravity();
 
+        protected void RestoreGravity()
+            => Owner.CharacterController.RestoreGravity();
+
         protected void DisableFriction()
             => Owner.CharacterController.DisableFriction();
 
-        protected void PlaySound(string soundId) => Debug.Log($"[Sound] {soundId}");
+        protected void RestoreFriction()
+            => Owner.CharacterController.RestoreFriction();
+
+        protected void PlaySound(uint soundId) => Owner.GameManager.AudioManager.Play(Owner.audioSheet.Get(soundId));
 
         // ── Cloning ────────────────────────────────────────────────────────────────────
 

@@ -54,6 +54,24 @@ namespace Systems.Audio.Runtime.BuiltIn
         public bool IsPlaying => _source != null && _source.isPlaying;
 
         /// <inheritdoc/>
+        public bool IsPaused => _isPaused;
+
+        /// <inheritdoc/>
+        public float Volume => _volume;
+
+        /// <inheritdoc/>
+        public float Speed => _speed;
+
+        /// <inheritdoc/>
+        public bool IsLooping => _isLooping;
+
+        /// <inheritdoc/>
+        public float Time => _source != null ? _source.time : 0f;
+
+        /// <inheritdoc/>
+        public float Length => _clip != null ? _clip.length : 0f;
+
+        /// <inheritdoc/>
         public event Action<Guid> OnReleased;
 
         /// <summary>
@@ -122,10 +140,14 @@ namespace Systems.Audio.Runtime.BuiltIn
         }
 
         /// <inheritdoc/>
+        /// <remarks>Also used by <see cref="BuiltInAudio"/> for O(1) removal on release.</remarks>
+        public AudioCategory Category => _category;
+
+        /// <inheritdoc/>
         public void SetVolume(float volume)
         {
             if (_source == null) return;
-            _volume = volume;
+            _volume = Mathf.Max(0f, volume);
             ApplyVolume();
         }
 
@@ -186,8 +208,10 @@ namespace Systems.Audio.Runtime.BuiltIn
         /// </summary>
         private IEnumerator CleanupRoutine()
         {
-            var remaining = (_clip.length - _source.time) / (_speed * _audio.GetCategorySpeed(_category));
-            yield return new WaitForSeconds(remaining);
+            var speedProduct = _speed * _audio.GetCategorySpeed(_category);
+            if (speedProduct <= 0f) { Release(); yield break; }
+            var remaining = (_clip.length - _source.time) / speedProduct;
+            yield return new WaitForSecondsRealtime(remaining);
             Release();
         }
 

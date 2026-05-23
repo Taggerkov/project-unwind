@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0d78be33342d9c36b7ede9afc6c077b, type: 3}
+  m_Name: MusicSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Systems.Audio.Music.MusicConfiguration
+  menuPlaylist:
+  - {fileID: 11400000, guid: 0e0e3aad013cac8f49cd9acf9000ba45, type: 2}
+  combatPlaylist:
+  - {fileID: 11400000, guid: 476e527bbff183b898034cfb61c6c6bd, type: 2}
+  - {fileID: 11400000, guid: 4bd11f3abe84e04b0879b9eb3fa451fc, type: 2}
+  - {fileID: 11400000, guid: fbac3a865e5d12b779e78f4dcbae2659, type: 2}
+  - {fileID: 11400000, guid: 798699dbc8dd7666391b3b32a24921ca, type: 2}
+  - {fileID: 11400000, guid: 420942c5fdfe5e12c93e63fb600286e3, type: 2}

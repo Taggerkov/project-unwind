@@ -14,6 +14,33 @@ namespace Systems.Audio.Contracts
         /// <summary>Returns true while the audio is actively playing.</summary>
         bool IsPlaying { get; }
 
+        /// <summary>Returns true while the audio is paused; false when playing, stopped, or released.</summary>
+        bool IsPaused { get; }
+
+        /// <summary>
+        /// The handle's own volume layer, as last set via <see cref="SetVolume"/>.
+        /// Excludes the category multiplier. Defaults to the request volume at playtime.
+        /// </summary>
+        float Volume { get; }
+
+        /// <summary>
+        /// The handle's own speed (pitch) layer, as last set via <see cref="SetSpeed"/>.
+        /// Excludes the category multiplier. Defaults to the request speed at playtime.
+        /// </summary>
+        float Speed { get; }
+
+        /// <summary>The category this handle plays into.</summary>
+        AudioCategory Category { get; }
+
+        /// <summary>True when the clip loops and the handle must be stopped explicitly.</summary>
+        bool IsLooping { get; }
+
+        /// <summary>The current playback position in seconds, or zero once released.</summary>
+        float Time { get; }
+
+        /// <summary>The total clip length in seconds.</summary>
+        float Length { get; }
+
         /// <summary>
         /// Pauses playback, preserving the current position.
         /// Has no effect if the handle is not currently playing.
@@ -49,7 +76,8 @@ namespace Systems.Audio.Contracts
         /// </summary>
         /// <remarks>
         /// Raised exactly once per playback instance.
-        /// The handle is removed from active tracking after this event fires.
+        /// Active tracking is cleared synchronously by subscribers within the event; do not call
+        /// playback methods on this UUID from within a handler.
         /// </remarks>
         event Action<Guid> OnReleased;
     }

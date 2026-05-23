@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
+using Systems.Audio.Shared;
 
 namespace Systems.Audio.Runtime.BuiltIn.Internal
 {
@@ -8,30 +10,81 @@ namespace Systems.Audio.Runtime.BuiltIn.Internal
     /// Manages a pool of <see cref="AudioSource"/> components for reuse across playback requests.
     /// Serves as the coroutine host for one-shot cleanup scheduling.
     /// </summary>
-    internal sealed class UnityAudioPool
+    internal sealed class UnityAudioPool : IDisposable
     {
+        /// <summary>The Unity ObjectPool backing the AudioSource reuse strategy.</summary>
         private readonly ObjectPool<AudioSource> _pool;
+
+        /// <summary>The MonoBehaviour host used to run one-shot cleanup coroutines on behalf of <see cref="AudioHandle"/>.</summary>
         private readonly MonoBehaviour _coroutineHost;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>The configured pre-warm size, used to detect runtime growth beyond it. Development builds only.</summary>
+        private readonly int _initialSize;
+
+        /// <summary>Total <see cref="AudioSource"/> instances created by the pool so far. Development builds only.</summary>
+        private int _createdCount;
+
+        /// <summary>True, once the overgrowth hint has been logged, so it fires at most once. Development builds only.</summary>
+        private bool _grewWarned;
+
+        /// <summary>Sources currently rented out for active playback. Development builds only.</summary>
+        internal int ActiveCount => _pool.CountActive;
+
+        /// <summary>Total sources created so far. Development builds only.</summary>
+        internal int CreatedCount => _createdCount;
+
+        /// <summary>The configured pre-warm size. Development builds only.</summary>
+        internal int ConfiguredSize => _initialSize;
+
+        /// <summary>True once the pool grew past its configured size. Development builds only.</summary>
+        internal bool HasGrown => _grewWarned;
+#endif
+
+        /// <summary>
+        /// Constructs the pool, creates the coroutine host <see cref="GameObject"/>, and pre-warms the pool.
+        /// </summary>
         /// <param name="initialSize">Number of <see cref="AudioSource"/> instances to pre-allocate.</param>
         public UnityAudioPool(int initialSize)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _initialSize = initialSize;
+#endif
             var host = new GameObject("[UnityAudioPool]");
-            Object.DontDestroyOnLoad(host);
+            UnityEngine.Object.DontDestroyOnLoad(host);
 
             _coroutineHost = host.AddComponent<AudioPoolHost>();
 
             _pool = new ObjectPool<AudioSource>(
-                createFunc: () => host.AddComponent<AudioSource>(),
+                createFunc: CreateSource,
                 actionOnGet: null,
                 actionOnRelease: ResetSource,
-                actionOnDestroy: Object.Destroy,
+                actionOnDestroy: UnityEngine.Object.Destroy,
                 collectionCheck: false,
                 defaultCapacity: initialSize
             );
 
             for (var i = 0; i < initialSize; i++)
                 _pool.Release(_pool.Get());
+        }
+
+        /// <summary>
+        /// Creates a new pooled <see cref="AudioSource"/>. Warns once (development builds only) when creation
+        /// exceeds the configured pre-warm size, signalling that <c>AudioSettings.PoolSize</c> is too low for
+        /// the peak number of concurrent sounds and runtime allocations are occurring.
+        /// </summary>
+        private AudioSource CreateSource()
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _createdCount++;
+            if (_createdCount <= _initialSize || _grewWarned)
+                return _coroutineHost.gameObject.AddComponent<AudioSource>();
+            _grewWarned = true;
+            AudioDiagnostics.Warn(
+                $"AudioSource pool grew past its configured size ({_initialSize}). " +
+                "Raise AudioSettings.PoolSize to cover peak concurrent sounds and avoid runtime allocations.");
+#endif
+            return _coroutineHost.gameObject.AddComponent<AudioSource>();
         }
 
         /// <summary>
@@ -61,12 +114,23 @@ namespace Systems.Audio.Runtime.BuiltIn.Internal
         /// <param name="coroutine">The coroutine to stop.</param>
         public void StopCoroutine(Coroutine coroutine) => _coroutineHost.StopCoroutine(coroutine);
 
+        /// <summary>
+        /// Disposes the pool and destroys the host <see cref="GameObject"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            _pool.Dispose();
+            UnityEngine.Object.Destroy(_coroutineHost.gameObject);
+        }
+
+        /// <summary>Resets all stateful fields on a returned <see cref="AudioSource"/> so it is clean when re-rented.</summary>
         private static void ResetSource(AudioSource source)
         {
             source.clip = null;
             source.volume = 1f;
             source.pitch = 1f;
             source.loop = false;
+            source.spatialBlend = 0f;
             source.outputAudioMixerGroup = null;
         }
 
