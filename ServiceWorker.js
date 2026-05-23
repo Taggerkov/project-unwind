@@ -1,9 +1,9 @@
-const cacheName = "TotallySaneStudio-Holy Order-0.1.3";
+const cacheName = "TotallySaneStudio-Project Unwind-0.1.3";
 const contentToCache = [
-    "Build/ec3f22810f4b3b0b7c617aa63af1f4e2.loader.js",
-    "Build/c7fa1762f4aecbf2ed37386181df8746.framework.js",
-    "Build/c9db56d594ada7434c73e0a82e3ab9a3.data",
-    "Build/96d99bd73318314c7ec143f666d3222c.wasm",
+    "Build/409660bdad0ddc344db199489dd852cf.loader.js",
+    "Build/9e807047170d8b5ca800187c2aa27437.framework.js.unityweb",
+    "Build/0b3eaea2fb807aa7d5587ff75dc5ab4c.data.unityweb",
+    "Build/069312f9c45cbd072a9ee1baac99fc9a.wasm.unityweb",
     "TemplateData/style.css"
 
 ];
