@@ -7,27 +7,46 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Data.Editor
 {
+    /// <summary>
+    /// Custom property drawer for <see cref="CombatantStats"/> and all subclasses. Splits
+    /// serialized fields into a "Base Stats" group (fields declared on <c>CombatantStats</c>
+    /// directly) and a character-specific group (fields from the concrete subclass), each
+    /// rendered under its own collapsible coloured header.
+    /// </summary>
     [CustomPropertyDrawer(typeof(CombatantStats), useForChildren: true)]
     public sealed class CombatantStatsDrawer : PropertyDrawer
     {
         // ── Constants ─────────────────────────────────────────────────────────────────────
 
+        /// <summary>The abstract base type whose fields are always placed in the "Base Stats" section.</summary>
         private static readonly Type s_BaseType = typeof(CombatantStats);
 
+        /// <summary>Pixel height of each coloured section header bar.</summary>
         private const float HeaderHeight = 20f;
+
+        /// <summary>Vertical gap between the header bar and the first property row.</summary>
         private const float HeaderSpacing = 4f;
+
+        /// <summary>Vertical gap between the base-stats section and the derived-stats section.</summary>
         private const float SectionSpacing = 6f;
 
+        /// <summary>Tint for the "Base Stats" header bar.</summary>
         private static readonly Color s_BaseHeaderColour = new(0.20f, 0.35f, 0.55f, 0.80f);
+
+        /// <summary>Tint for the character-specific stats header bar.</summary>
         private static readonly Color s_DerivedHeaderColour = new(0.30f, 0.50f, 0.30f, 0.80f);
 
         // Foldout state is keyed by SerializedProperty.propertyPath so each field on each
         // object gets its own toggle, surviving domain reloads (Dictionary resets, which is fine).
+        /// <summary>Persistent foldout state for the base-stats section, keyed by property path.</summary>
         private static readonly Dictionary<string, bool> s_BaseFoldouts = new();
+
+        /// <summary>Persistent foldout state for the derived-stats section, keyed by property path.</summary>
         private static readonly Dictionary<string, bool> s_DerivedFoldouts = new();
 
         // ── PropertyDrawer overrides ──────────────────────────────────────────────────────
 
+        /// <summary>Returns the total height of both sections (base and derived) including their headers and foldout state.</summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (property.managedReferenceValue == null)
@@ -47,6 +66,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             return h;
         }
 
+        /// <summary>Renders the base-stats section and, when derived fields exist, the character-specific section below it.</summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.managedReferenceValue == null)
@@ -124,6 +144,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Height helpers ────────────────────────────────────────────────────────────────
 
+        /// <summary>Computes the pixel height of a section: always includes the header; adds property rows when <paramref name="open"/>.</summary>
         private static float SectionHeight(List<SerializedProperty> props, bool open)
         {
             // Header is always visible
@@ -215,6 +236,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Foldout state helpers ─────────────────────────────────────────────────────────
 
+        /// <summary>Returns the stored foldout state for <paramref name="key"/>, or <paramref name="defaultOpen"/> when not yet recorded.</summary>
         private static bool GetFoldout(Dictionary<string, bool> dict, string key, bool defaultOpen)
         {
             return dict.TryGetValue(key, out bool v) ? v : defaultOpen;

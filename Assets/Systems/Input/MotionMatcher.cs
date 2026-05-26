@@ -229,14 +229,14 @@ namespace Systems.Input
 
         private static readonly EDirectionInput[][] QcfSteps =
         {
-            new[] { EDirectionInput.Input6, EDirectionInput.Input3 },
+            new[] { EDirectionInput.Input6 },
             new[] { EDirectionInput.Input3 },
             new[] { EDirectionInput.Input2, EDirectionInput.Input1, EDirectionInput.Input3 },
         };
 
         private static readonly EDirectionInput[][] QcbSteps =
         {
-            new[] { EDirectionInput.Input4, EDirectionInput.Input1 },
+            new[] { EDirectionInput.Input4 },
             new[] { EDirectionInput.Input1 },
             new[] { EDirectionInput.Input2, EDirectionInput.Input3, EDirectionInput.Input1 },
         };
@@ -244,14 +244,14 @@ namespace Systems.Input
         private static readonly EDirectionInput[][] DpSteps =
         {
             new[] { EDirectionInput.Input6, EDirectionInput.Input3 },
-            new[] { EDirectionInput.Input2, EDirectionInput.Input3 },
+            new[] { EDirectionInput.Input2 },
             new[] { EDirectionInput.Input6 },
         };
 
         private static readonly EDirectionInput[][] RdpSteps =
         {
             new[] { EDirectionInput.Input4, EDirectionInput.Input1 },
-            new[] { EDirectionInput.Input2, EDirectionInput.Input1 },
+            new[] { EDirectionInput.Input2 },
             new[] { EDirectionInput.Input4 },
         };
 

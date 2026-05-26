@@ -9,6 +9,10 @@ namespace Dev.Common.Editor
     /// </summary>
     public abstract class CombatantSpawnMarkerGizmo
     {
+        /// <summary>
+        /// Draws XYZ axis rays (red/green/blue) and a yellow label at each spawn point when the
+        /// <see cref="CombatantSpawnMarker"/> is not selected in the hierarchy.
+        /// </summary>
         [DrawGizmo(GizmoType.NonSelected)]
         private static void DrawPositionMarkerGizmo(CombatantSpawnMarker markers, GizmoType gizmoType)
         {
@@ -33,6 +37,7 @@ namespace Dev.Common.Editor
             Handles.Label(markers.Combatant1SpawnPoint.position, markers.combatant1SpawnMarkerLabel, style);
         }
 
+        /// <summary>Draws only the yellow spawn-point labels when the <see cref="CombatantSpawnMarker"/> is selected.</summary>
         [DrawGizmo(GizmoType.Selected)]
         private static void DrawPositionMarkerGizmoLabelOnly(CombatantSpawnMarker markers, GizmoType gizmoType)
         {

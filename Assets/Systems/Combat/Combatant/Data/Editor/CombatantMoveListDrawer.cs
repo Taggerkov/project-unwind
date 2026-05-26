@@ -7,14 +7,24 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Data.Editor
 {
+    /// <summary>
+    /// Custom property drawer for <see cref="CombatantMoveList"/>. Renders the inner
+    /// <c>List&lt;CombatantMove&gt;</c> as a <see cref="ReorderableList"/> with a type-filtered
+    /// add menu and a per-element ▾ dropdown for changing the concrete move type.
+    /// </summary>
     [CustomPropertyDrawer(typeof(CombatantMoveList))]
     public class CombatantMoveListDrawer : PropertyDrawer
     {
-        internal const float ButtonMargin = 26f; // reserved for parent's ▾ button overlay
-        internal const float DraggableMargin = 8f; // reserved for ReorderableList's drag handle
+        /// <summary>Pixels reserved on the right of each element for the parent's ▾ type-selector button overlay.</summary>
+        internal const float ButtonMargin = 26f;
 
+        /// <summary>Pixels reserved on the left of each element for the ReorderableList drag handle.</summary>
+        internal const float DraggableMargin = 8f;
+
+        /// <summary>Per-property ReorderableList instances keyed by a stable object/path string.</summary>
         private readonly System.Collections.Generic.Dictionary<string, ReorderableList> _lists = new();
 
+        /// <summary>Delegates rendering to the cached <see cref="ReorderableList"/> for this property.</summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -22,11 +32,17 @@ namespace Systems.Combat.Combatant.Data.Editor
             EditorGUI.EndProperty();
         }
 
+        /// <summary>Returns the height reported by the cached <see cref="ReorderableList"/>.</summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             return GetOrCreateList(property).GetHeight();
         }
 
+        /// <summary>
+        /// Returns the <see cref="ReorderableList"/> for this property, creating and configuring
+        /// it on first access. The list is keyed by instance ID and property path to survive
+        /// Inspector redraws without losing scroll position or selection state.
+        /// </summary>
         private ReorderableList GetOrCreateList(SerializedProperty property)
         {
             string key = $"{property.serializedObject.targetObject.GetInstanceID()}:{property.propertyPath}";
@@ -114,6 +130,11 @@ namespace Systems.Combat.Combatant.Data.Editor
             return list;
         }
 
+        /// <summary>
+        /// Builds and shows a <see cref="GenericMenu"/> listing all <c>CombatantMove&lt;TStats&gt;</c>
+        /// types compatible with <paramref name="statsType"/>, grouped by namespace path.
+        /// Selecting a type appends a new instance to the serialized array.
+        /// </summary>
         private static void ShowAddMenu(
             Rect buttonRect, Type statsType, SerializedObject so, string arrayPath)
         {

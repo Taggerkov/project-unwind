@@ -4,33 +4,54 @@ using Unity.Mathematics.Geometry;
 
 namespace Systems.Combat.HitSystem
 {
+    /// <summary>
+    /// Resolves hitbox–hurtbox overlaps for one logic tick. Combatants register their world-space
+    /// volumes each tick; <see cref="Solve"/> performs an N×M AABB intersection test, deduplicates
+    /// using a per-move hit registry, and returns a list of confirmed collision tuples for
+    /// <see cref="CombatManager"/> to dispatch as hit events.
+    /// </summary>
     public class CombatOverlapSolver
     {
+        /// <summary>Hurtbox volumes registered this tick, keyed by the owning combatant.</summary>
         private Dictionary<CombatantBehaviour, MinMaxAABB[]> _hurtboxes = new();
+
+        /// <summary>Hitbox volumes and their hit data registered this tick, keyed by the attacking combatant.</summary>
         private Dictionary<CombatantBehaviour, (HitData, MinMaxAABB[])> _hitboxes = new();
 
+        /// <summary>
+        /// Per-move hit registry that prevents the same (attacker, hitId, defender) tuple from
+        /// being processed more than once. Cleared when the attacker starts a new move.
+        /// </summary>
         private readonly HashSet<(CombatantBehaviour perpetrator, uint hitId, CombatantBehaviour victim)>
             _hitRegistry = new();
 
+        /// <summary>Stores the hurtbox volumes for <paramref name="combatantBehaviour"/> this tick, replacing any previously registered volumes.</summary>
         public void RegisterHurtboxes(CombatantBehaviour combatantBehaviour, MinMaxAABB[] hurtboxes)
         {
             _hurtboxes[combatantBehaviour] = hurtboxes;
         }
 
+        /// <summary>Stores the hitbox volumes and hit data for <paramref name="combatantBehaviour"/> this tick.</summary>
         public void RegisterHitboxes(CombatantBehaviour combatantBehaviour, HitData hitData, MinMaxAABB[] hitboxes)
         {
             _hitboxes[combatantBehaviour] = (hitData, hitboxes);
         }
 
+        /// <summary>Clears all per-tick hitbox and hurtbox registrations. Call at the start of each logic tick.</summary>
         public void ClearFramedata()
         {
             _hurtboxes.Clear();
             _hitboxes.Clear();
         }
 
+        /// <summary>Removes all hit-registry entries for <paramref name="perpetrator"/>. Called when they start a new move.</summary>
         public void ClearHitRegistry(CombatantBehaviour perpetrator) =>
             _hitRegistry.RemoveWhere(e => e.perpetrator == perpetrator);
 
+        /// <summary>
+        /// Tests all registered hitboxes against all registered hurtboxes. Returns a list of
+        /// <c>(defender, hitData, attacker)</c> tuples for every confirmed, non-deduplicated overlap.
+        /// </summary>
         public List<(CombatantBehaviour, HitData, CombatantBehaviour)> Solve()
         {
             var result = new List<(CombatantBehaviour, HitData, CombatantBehaviour)>();
@@ -81,6 +102,7 @@ namespace Systems.Combat.HitSystem
         }
 
 
+        /// <summary>Returns true when the hit's <paramref name="target"/> restriction is satisfied for the given attacker–defender pair.</summary>
         private static bool TargetMatches(EHitTarget target, CombatantBehaviour attacker, CombatantBehaviour defender)
             => target switch
             {
@@ -89,14 +111,16 @@ namespace Systems.Combat.HitSystem
                 _ => true
             };
 
+        /// <summary>Placeholder: treats any two different combatant instances as enemies.</summary>
         private static bool AreEnemies(CombatantBehaviour a, CombatantBehaviour b)
         {
-            return a != b; // TODO: Placeholder: consider all different combatants as enemies
+            return a != b;
         }
 
+        /// <summary>Placeholder: no ally relationship is defined yet; always returns false.</summary>
         private static bool AreAllies(CombatantBehaviour a, CombatantBehaviour b)
         {
-            return false; // TODO: Placeholder: no allies in this simple implementation
+            return false;
         }
     }
 }

@@ -29,11 +29,15 @@ namespace Systems.Combat.Combatant.Data.Editor
     [CustomPropertyDrawer(typeof(CombatantMove), useForChildren: true)]
     public sealed class CombatantMoveDrawer : PropertyDrawer
     {
+        /// <summary>Pixel height of the collapsed header row.</summary>
         internal const float HeaderHeight = 22f;
+
+        /// <summary>Vertical padding in pixels inserted between the header and child fields, and between child fields.</summary>
         private const float Spacing = 2f;
 
         // ── PropertyDrawer overrides ───────────────────────────────────────────────────
 
+        /// <summary>Renders the header row and, when expanded, all visible child properties of the managed reference.</summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.ManagedReference)
@@ -65,6 +69,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             EditorGUI.EndProperty();
         }
 
+        /// <summary>Returns the total pixel height: header plus child fields when expanded.</summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.ManagedReference)
@@ -84,6 +89,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Header drawing ─────────────────────────────────────────────────────────────
 
+        /// <summary>Draws the tinted background, foldout arrow, move name, and badge strip for a single move header row.</summary>
         private static void DrawHeader(Rect rect, SerializedProperty property)
         {
             var currentType = property.managedReferenceValue?.GetType();
@@ -105,6 +111,7 @@ namespace Systems.Combat.Combatant.Data.Editor
                 DrawBadges(rect, property);
         }
 
+        /// <summary>Draws the coloured badge strip (commit type, hit/block conditions, character state, move type) right-aligned within <paramref name="rect"/>.</summary>
         private static void DrawBadges(Rect rect, SerializedProperty property)
         {
             var style = new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.MiddleRight };
@@ -135,15 +142,19 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Badge value helpers ────────────────────────────────────────────────────────
 
+        /// <summary>Returns the <see cref="EMoveType"/> badge string for the given move property.</summary>
         private static string GetTypeBadge(SerializedProperty p)
             => ReadEnumName(p, "type", "_type");
 
+        /// <summary>Returns the character-state badge string for the given move property.</summary>
         private static string GetCharacterStateBadge(SerializedProperty p)
             => ReadEnumName(p, "characterState", "_characterState");
 
+        /// <summary>Returns the commit-type badge string for the given move property.</summary>
         private static string GetCommitTypeBadge(SerializedProperty p)
             => ReadEnumName(p, "commitType", "_commitType");
 
+        /// <summary>Returns a short human-readable label for the hit/block-conditions enum, or null when not found.</summary>
         private static string GetHitBlockConditions(SerializedProperty moveProp)
         {
             var prop = moveProp.FindPropertyRelative("hitBlockConditions")
@@ -164,6 +175,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             };
         }
 
+        /// <summary>Reads an enum field by <paramref name="name"/> or <paramref name="alt"/> from the managed reference and returns its name string, or null on failure.</summary>
         private static string ReadEnumName(SerializedProperty moveProp, string name, string alt)
         {
             var prop = moveProp.FindPropertyRelative(name)
@@ -178,6 +190,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Reflection / iteration helpers ────────────────────────────────────────────
 
+        /// <summary>Walks the type hierarchy from <paramref name="type"/> upward, returning the first <see cref="FieldInfo"/> matching <paramref name="fieldName"/>.</summary>
         private static FieldInfo GetFieldInHierarchy(Type type, string fieldName)
         {
             for (var t = type; t != null; t = t.BaseType)
@@ -190,6 +203,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             return null;
         }
 
+        /// <summary>Yields each visible direct child property of <paramref name="parent"/> without recursing into grandchildren.</summary>
         private static IEnumerable<SerializedProperty> IterateVisibleChildren(SerializedProperty parent)
         {
             var current = parent.Copy();
@@ -202,6 +216,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             }
         }
 
+        /// <summary>Converts a PascalCase type name into a space-separated label, stripping the trailing "Move" suffix.</summary>
         private static string NiceName(Type type)
         {
             var name = Regex.Replace(type.Name, "(?<=[a-z])([A-Z])", " $1");

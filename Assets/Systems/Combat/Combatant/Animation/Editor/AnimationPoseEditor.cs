@@ -11,69 +11,121 @@ using Pose = Systems.Combat.Combatant.Behaviour.Pose;
 
 namespace Systems.Combat.Combatant.Animation.Editor
 {
+    /// <summary>
+    /// EditorWindow tool for authoring <see cref="CombatantPoseSheet"/> assets. Provides two tabs:
+    /// the Pose Data Editor (manually position a character in scene, capture bone transforms, and
+    /// paint hitbox/hurtbox volumes per pose ID) and the Pose Baker (sample every frame of an
+    /// <see cref="AnimationClip"/> imported from an FBX and write each frame as a pose into the sheet).
+    /// Open via <c>Unwind → Pose Baker</c>.
+    /// </summary>
     public class AnimationPoseEditor : EditorWindow
     {
         // ── Source ─────────────────────────────────────────────────────────────────
 
+        /// <summary>Scene GameObject selected as the capture target; must carry a <see cref="CombatantBehaviour"/>.</summary>
         private GameObject _character;
+
+        /// <summary><see cref="CombatantBehaviour"/> resolved from <see cref="_character"/> on selection.</summary>
         private CombatantBehaviour _behaviour;
+
+        /// <summary>Pose sheet asset bound to the selected character; written and read during capture and bake.</summary>
         private CombatantPoseSheet _sheet;
+
+        /// <summary><see cref="PoseAnimator"/> resolved from <see cref="_behaviour"/>; used to apply previewed poses.</summary>
         private PoseAnimator _poseAnimator;
 
+        /// <summary>Fallback pose applied after baking to restore the character to a neutral stance.</summary>
         private Pose _defaultPose;
+
+        /// <summary>Path-keyed bone cache built from the skeleton root; used by ApplyPose and SnapshotBones.</summary>
         private Dictionary<string, Transform> _boneMap;
 
+        /// <summary>Live hurtbox volumes for the currently previewed pose; edited inline and written on Save.</summary>
         private List<MinMaxAABB> _hurtboxes = new();
+
+        /// <summary>Live hitbox volumes for the currently previewed pose; edited inline and written on Save.</summary>
         private List<MinMaxAABB> _hitboxes = new();
 
         // ── Selection ──────────────────────────────────────────────────────────────
 
+        /// <summary>Identifies which collision-box list a selection or draw call targets.</summary>
         private enum BoxList
         {
+            /// <summary>No list is active; selection is cleared.</summary>
             None,
+            /// <summary>Targets <see cref="_hurtboxes"/>.</summary>
             Hurtbox,
+            /// <summary>Targets <see cref="_hitboxes"/>.</summary>
             Hitbox
         }
 
+        /// <summary>Which box list currently owns the selected element.</summary>
         private BoxList _selectedList = BoxList.None;
+
+        /// <summary>Index of the selected element within <see cref="_selectedList"/>; -1 when nothing is selected.</summary>
         private int _selectedIndex = -1;
+
+        /// <summary>Active tab index: 0 = Pose Data Editor, 1 = Pose Baker.</summary>
         private int _selectedTab = 0;
 
+        /// <summary>True when a valid box element is selected and ready for scene-handle interaction.</summary>
         private bool HasSelection => _selectedList != BoxList.None && _selectedIndex >= 0;
 
+        /// <summary>Scene handle used to drag and resize the selected box in the SceneView.</summary>
         private readonly BoxBoundsHandle _boundsHandle = new();
 
         // ── ID selection ───────────────────────────────────────────────────────────
 
+        /// <summary>Number of local pose IDs in each collection block (0–99 per block).</summary>
         private const int BlockSize = 100;
 
+        /// <summary>Currently selected collection (block) index; maps to a <see cref="CombatantPoseCollection"/>.</summary>
         private int _blockIndex = 0;
+
+        /// <summary>Local pose offset within the current block (0–99).</summary>
         private int _poseOffset = 0;
 
+        /// <summary>Global pose ID computed as <c>blockIndex * BlockSize + poseOffset</c>.</summary>
         private uint EffectiveId => (uint)(_blockIndex * BlockSize + _poseOffset);
 
         // ── Bake ───────────────────────────────────────────────────────────────────
 
+        /// <summary>The <see cref="AnimationClip"/> selected for baking; one of the clips in <see cref="_clipsToBake"/>.</summary>
         private AnimationClip _bakeClip;
 
+        /// <summary>FBX asset selected as the clip source; all non-preview clips within it populate <see cref="_clipsToBake"/>.</summary>
         private GameObject _fbxAsset;
+
+        /// <summary>All <see cref="AnimationClip"/> sub-assets found inside <see cref="_fbxAsset"/>.</summary>
         private List<AnimationClip> _clipsToBake = new();
 
         // ── Styles ─────────────────────────────────────────────────────────────────
 
+        /// <summary>Bold orange mini-label used for overwrite warnings.</summary>
         private GUIStyle _warningStyle;
+
+        /// <summary>Dimmed mini-label used for secondary info rows.</summary>
         private GUIStyle _subtleLabel;
+
+        /// <summary>HelpBox-styled background drawn behind the selected box row.</summary>
         private GUIStyle _rowSelected;
+
+        /// <summary>Empty style drawn behind unselected box rows.</summary>
         private GUIStyle _rowNormal;
 
+        /// <summary>Opens the Pose Editor window from the Unwind menu.</summary>
         [MenuItem("Unwind/Pose Baker")]
         private static void Open() => GetWindow<AnimationPoseEditor>("Pose Editor");
 
+        /// <summary>Subscribes <see cref="OnSceneGUI"/> to the SceneView delegate so box handles render in the scene.</summary>
         private void OnEnable() => SceneView.duringSceneGui += OnSceneGUI;
+
+        /// <summary>Unsubscribes <see cref="OnSceneGUI"/> to prevent stale callbacks after the window is closed.</summary>
         private void OnDisable() => SceneView.duringSceneGui -= OnSceneGUI;
 
         // ── GUI ────────────────────────────────────────────────────────────────────
 
+        /// <summary>Renders the full editor window: source section, tab bar, and the active tab's content.</summary>
         private void OnGUI()
         {
             InitStyles();
@@ -104,6 +156,10 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Scene GUI ──────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// SceneView delegate that overlays hurtbox and hitbox wireframes and, for the selected box,
+        /// a position handle and a resizable <see cref="BoxBoundsHandle"/>.
+        /// </summary>
         private void OnSceneGUI(SceneView _)
         {
             if (!_character || !_behaviour || _poseAnimator?.CurrentPose.Bones == null) return;
@@ -119,6 +175,11 @@ namespace Systems.Combat.Combatant.Animation.Editor
                 new Color(1f, 0.2f, 0.2f, 0.80f));
         }
 
+        /// <summary>
+        /// Draws all boxes in <paramref name="boxes"/> as wireframe cubes in the scene. The selected
+        /// box is rendered with an interactive position handle and <see cref="_boundsHandle"/>; changes
+        /// are written back to the list immediately so the Inspector reflects them on repaint.
+        /// </summary>
         private void DrawSceneBoxList(List<MinMaxAABB> boxes, BoxList type, Color normal, Color selected)
         {
             var origin = (float3)_behaviour.transform.position;
@@ -170,6 +231,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Source section ─────────────────────────────────────────────────────────
 
+        /// <summary>Renders the character object field and a read-only display of the resolved pose sheet.</summary>
         private void DrawSourceSection()
         {
             EditorGUILayout.LabelField("Source", EditorStyles.boldLabel);
@@ -185,6 +247,12 @@ namespace Systems.Combat.Combatant.Animation.Editor
             EditorGUI.EndDisabledGroup();
         }
 
+        /// <summary>
+        /// Resolves <see cref="_behaviour"/>, <see cref="_sheet"/>, <see cref="_poseAnimator"/>, and
+        /// <see cref="_boneMap"/> from the newly assigned <see cref="_character"/>. Logs a warning and
+        /// clears state when the GameObject lacks a <see cref="CombatantBehaviour"/>. Also loads or
+        /// synthesises the default pose used to reset the skeleton after baking.
+        /// </summary>
         private void TryBindCharacter()
         {
             _behaviour = _character.GetComponent<CombatantBehaviour>();
@@ -219,6 +287,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
             }
         }
 
+        /// <summary>Renders the Pose Data Editor / Pose Baker toolbar that switches <see cref="_selectedTab"/>.</summary>
         private void DrawTabSelection()
         {
             EditorGUILayout.BeginHorizontal();
@@ -234,6 +303,10 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Bake section ───────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Renders the Pose Baker tab UI: FBX asset picker, clip navigator, frame-count summary,
+        /// overwrite warning, and the Bake button. Calls <see cref="BakeClip"/> on confirmation.
+        /// </summary>
         private void DrawBakeSection()
         {
             EditorGUILayout.LabelField("Pose Baker", EditorStyles.boldLabel);
@@ -267,7 +340,6 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
             if (_clipsToBake.Count > 0)
             {
-                //Display a readonly label populated with the clip, allow changing the clip via arrows to the left and right
                 int clipIndex = Mathf.Max(0, Mathf.Min(_clipsToBake.Count - 1, _clipsToBake.IndexOf(_bakeClip)));
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("<", GUILayout.Width(28), GUILayout.Height(28)))
@@ -319,6 +391,12 @@ namespace Systems.Combat.Combatant.Animation.Editor
                 BakeClip(_bakeClip, frameCount);
         }
 
+        /// <summary>
+        /// Samples <paramref name="clip"/> frame-by-frame using Unity's <see cref="AnimationMode"/>,
+        /// captures bone transforms at each frame, preserves any existing box data, and writes every
+        /// resulting <see cref="Pose"/> into the sheet starting at <see cref="_blockIndex"/>.
+        /// Restores the skeleton to <see cref="_defaultPose"/> in the finally block regardless of errors.
+        /// </summary>
         private void BakeClip(AnimationClip clip, int frameCount)
         {
             AnimationMode.StartAnimationMode();
@@ -340,8 +418,6 @@ namespace Systems.Combat.Combatant.Animation.Editor
                     {
                         Bones = boneData
                     };
-
-                    //Check if we are overriding an existing pose, if so, we preserve the existing boxes
 
                     if (_sheet.TryGetPose((uint)(_blockIndex + frame / BlockSize), (uint)(frame % BlockSize),
                             out var existingPose))
@@ -380,6 +456,10 @@ namespace Systems.Combat.Combatant.Animation.Editor
             }
         }
 
+        /// <summary>
+        /// Clears and repopulates <see cref="_clipsToBake"/> from all <see cref="AnimationClip"/>
+        /// sub-assets embedded in <see cref="_fbxAsset"/>, excluding Unity's internal preview clips.
+        /// </summary>
         private void RefreshClips()
         {
             _clipsToBake.Clear();
@@ -387,7 +467,6 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
             string path = AssetDatabase.GetAssetPath(_fbxAsset);
 
-            // Load ALL sub-assets at the FBX path and filter for AnimationClips
             UnityEngine.Object[] allAssets = AssetDatabase.LoadAllAssetsAtPath(path);
             foreach (var asset in allAssets)
             {
@@ -402,6 +481,11 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── ID section ─────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Renders the Pose ID panel: optional block-index field, optional pose-offset slider, and
+        /// optional Save to Default Pose button. Parameters let the Bake tab reuse this section with
+        /// only the block selector visible.
+        /// </summary>
         private void DrawIdSection(bool drawBlockSelector = true, bool drawOffsetSelector = true,
             bool drawDefaultSetter = true)
         {
@@ -465,6 +549,10 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Box editor section ─────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Renders the Collision Boxes panel: hurtbox and hitbox lists with add/remove controls,
+        /// and a center/size field for the selected box.
+        /// </summary>
         private void DrawBoxEditorSection()
         {
             EditorGUILayout.LabelField("Collision Boxes", EditorStyles.boldLabel);
@@ -503,6 +591,11 @@ namespace Systems.Combat.Combatant.Animation.Editor
             }
         }
 
+        /// <summary>
+        /// Renders a labelled, scrollable list of AABB entries with per-row select and delete controls.
+        /// The label's last two characters are assumed to be "es" (e.g. "Hurtboxes") and are stripped
+        /// to produce the singular row label ("Hurtbox").
+        /// </summary>
         private void DrawBoxList(string label, List<MinMaxAABB> boxes, BoxList type, Color accentColor)
         {
             EditorGUILayout.BeginHorizontal();
@@ -570,6 +663,10 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Save section ───────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Renders the Box Edit Actions toolbar: Select Pose (copy boxes from any pose via
+        /// <see cref="SliderPromptWindow"/>), navigate to adjacent poses, Save Boxes, and Delete.
+        /// </summary>
         private void DrawBoxEditSection()
         {
             GUILayout.Label("Box Edit Actions", EditorStyles.boldLabel);
@@ -614,6 +711,12 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Core ───────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Applies the pose at (<paramref name="collectionId"/>, <paramref name="poseId"/>) to the
+        /// skeleton via <see cref="PoseAnimator.ApplyPose"/> and loads its box arrays into
+        /// <see cref="_hurtboxes"/> and <see cref="_hitboxes"/>. Falls back to the default pose when
+        /// the ID does not exist. Clears the current selection and repaints the scene.
+        /// </summary>
         private void PreviewPose(uint collectionId, uint poseId)
         {
             _sheet.TryGetPose(collectionId, poseId, out var pose);
@@ -627,6 +730,11 @@ namespace Systems.Combat.Combatant.Animation.Editor
             SceneView.RepaintAll();
         }
 
+        /// <summary>
+        /// Replaces the live box lists with those from the pose at (<paramref name="collectionId"/>,
+        /// <paramref name="poseId"/>), or clears them when the pose does not exist. Does not change
+        /// the skeleton transform, so it can be used to transplant boxes between poses.
+        /// </summary>
         private void CopyBoxes(uint collectionId, uint poseId)
         {
             if (_sheet.TryGetPose(collectionId, poseId, out var pose))
@@ -644,6 +752,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
             SceneView.RepaintAll();
         }
 
+        /// <summary>Clears all live hurtbox and hitbox volumes and resets the selection state.</summary>
         private void RemoveBoxes()
         {
             _hurtboxes.Clear();
@@ -677,6 +786,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
             return SnapshotBones();
         }
 
+        /// <summary>Reads the current local transform of every bone in <see cref="_boneMap"/> into a new <see cref="BoneData"/> array.</summary>
         private BoneData[] SnapshotBones()
         {
             var bones = new BoneData[_boneMap.Count];
@@ -697,9 +807,11 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Selection helpers ──────────────────────────────────────────────────────
 
+        /// <summary>Returns the live box list that owns the current selection.</summary>
         private List<MinMaxAABB> ActiveList() =>
             _selectedList == BoxList.Hurtbox ? _hurtboxes : _hitboxes;
 
+        /// <summary>Sets the active selection to <paramref name="index"/> in <paramref name="type"/> and requests a repaint.</summary>
         private void SelectBox(BoxList type, int index)
         {
             _selectedList = type;
@@ -708,6 +820,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
             SceneView.RepaintAll();
         }
 
+        /// <summary>Clears the active selection without affecting the box lists.</summary>
         private void ClearSelection()
         {
             _selectedList = BoxList.None;
@@ -716,6 +829,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Validation ─────────────────────────────────────────────────────────────
 
+        /// <summary>Returns true when all required references are bound; draws an info box and returns false otherwise.</summary>
         private bool ValidateInputs()
         {
             if (!_character || _sheet == null || !_poseAnimator || _boneMap == null)
@@ -731,6 +845,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
 
         // ── Styles ─────────────────────────────────────────────────────────────────
 
+        /// <summary>Lazily initialises IMGUI style objects; no-ops after the first call.</summary>
         private void InitStyles()
         {
             if (_warningStyle != null) return;

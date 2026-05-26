@@ -6,16 +6,30 @@ using UnityEngine.InputSystem;
 
 namespace Systems.Core
 {
+    /// <summary>
+    /// Tracks the two <see cref="PlayerLinker"/> instances that join and leave through Unity's
+    /// <see cref="PlayerInputManager"/> and dispatches typed events to subscribers (e.g.
+    /// <see cref="UIManager"/>). Supports at most two simultaneous players.
+    /// </summary>
     public class PlayerRegistry : IDisposable
     {
+        /// <summary>Raised when a player joins; provides the player's <see cref="PlayerLinker"/>.</summary>
         public event Action<PlayerLinker> OnPlayerJoined;
+
+        /// <summary>Raised when a player leaves; provides the player's <see cref="PlayerLinker"/>.</summary>
         public event Action<PlayerLinker> OnPlayerLeft;
 
+        /// <summary>Unity's input manager used to detect join and leave events.</summary>
         private readonly PlayerInputManager _playerInputManager;
 
+        /// <summary>Linker for player index 0; null when that slot is unoccupied.</summary>
         private PlayerLinker _player0Linker;
+
+        /// <summary>Linker for player index 1; null when that slot is unoccupied.</summary>
         private PlayerLinker _player1Linker;
 
+        /// <summary>Subscribes to the PlayerInputManager join and leave callbacks.</summary>
+        /// <param name="playerInputManager">The scene's PlayerInputManager component.</param>
         public PlayerRegistry(PlayerInputManager playerInputManager)
         {
             _playerInputManager = playerInputManager;
@@ -23,6 +37,7 @@ namespace Systems.Core
             _playerInputManager.onPlayerLeft += HandlePlayerLeft;
         }
 
+        /// <summary>Unsubscribes from the PlayerInputManager callbacks.</summary>
         public void Dispose()
         {
             _playerInputManager.onPlayerJoined -= HandlePlayerJoined;
@@ -30,7 +45,8 @@ namespace Systems.Core
             Debug.Log("PlayerRegistry: Dispose()");
         }
 
-        
+        /// <summary>Returns a list of all currently joined players in join order.</summary>
+        /// <returns>A list containing the linkers for slots 0 and 1 that are currently occupied.</returns>
         public List<PlayerLinker> GetAllPlayers()
         {
             var players = new List<PlayerLinker>();
@@ -39,18 +55,22 @@ namespace Systems.Core
             return players;
         }
 
+        /// <summary>
+        /// Resolves the <see cref="PlayerLinker"/> on the joining PlayerInput, slots it by
+        /// player index, and raises <see cref="OnPlayerJoined"/>.
+        /// </summary>
         private void HandlePlayerJoined(PlayerInput playerInput)
         {
             Debug.Log($"Player {playerInput.playerIndex} Joined!");
-            
+
             var linker = playerInput.GetComponent<PlayerLinker>();
-            
+
             if (!linker)
             {
                 Debug.LogError("PlayerRegistry: PlayerInput does not have a PlayerLinker component!");
                 return;
             }
-            
+
             if (playerInput.playerIndex == 0)
             {
                 _player0Linker = linker;
@@ -68,6 +88,10 @@ namespace Systems.Core
             OnPlayerJoined?.Invoke(linker);
         }
 
+        /// <summary>
+        /// Clears the departing player's slot and raises <see cref="OnPlayerLeft"/> if a linker
+        /// was present.
+        /// </summary>
         private void HandlePlayerLeft(PlayerInput playerInput)
         {
             Debug.Log($"Player {playerInput.playerIndex} Left!");

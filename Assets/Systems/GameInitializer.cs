@@ -3,25 +3,38 @@ using Reflex.Injectors;
 using Systems.Combat.Camera;
 using Systems.Core;
 using Systems.UI.Combat;
-using Systems.UI.CombatantSelect;
-using Systems.UI.MainMenu;
+using Systems.UI.Overlay;
+using Systems.UI.Menu.CombatantSelect;
+using Systems.UI.Menu.MainMenu;
 using Systems.UI.Dev.CollisionVisualizer;
-using Systems.UI.Dev.InputHistory.Scripts;
-using Systems.UI.Transition;
+using Systems.UI.Dev.InputHistory;
+using Systems.UI.Core.Transition;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 
 namespace Systems
 {
+    /// <summary>
+    /// Static entry point that wires the Reflex DI container before any scene loads. Instantiates
+    /// the <c>GlobalSystems</c> prefab from Resources, resolves required components, registers them as
+    /// Reflex values, and performs post-build attribute injection for MonoBehaviours that need
+    /// injected references before their first tick.
+    /// </summary>
     public static class GameInitializer
     {
+        /// <summary>Registers <see cref="InjectGlobalSystems"/> as the Reflex root container builder delegate.</summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
             ContainerScope.OnRootContainerBuilding += InjectGlobalSystems;
         }
 
+        /// <summary>
+        /// Loads and instantiates the GlobalSystems prefab, resolves all required singleton components,
+        /// registers them in the Reflex container, and schedules post-build attribute injection.
+        /// Logs an error and returns early when any required component is missing.
+        /// </summary>
         private static void InjectGlobalSystems(ContainerBuilder containerBuilder)
         {
             Debug.Log("GameInitializer: Injecting global systems...");
@@ -39,7 +52,7 @@ namespace Systems
 
             Object.DontDestroyOnLoad(instance);
 
-            //Expected GlobalSystems structure:
+            // Expected GlobalSystems prefab hierarchy:
             // - GlobalSystems (TickManager, PlayerInputManager, KinematicCharacterSystem)
             //   - MainMenu
             //     - UI_MainMenu (Canvas)
@@ -119,7 +132,7 @@ namespace Systems
 
             containerBuilder.RegisterValue(tickManager);
             containerBuilder.RegisterValue(new MainMenuCanvas(mainMenuCanvas));
-            containerBuilder.RegisterValue(new CharacterSelectCanvas(charSelectCanvas));
+            containerBuilder.RegisterValue(new CombatantSelectCanvas(charSelectCanvas));
             containerBuilder.RegisterValue(playerInputManager);
             containerBuilder.RegisterValue(combatUIController);
 
@@ -132,6 +145,10 @@ namespace Systems
                     PostBuildInjection(tickManager, inputHistoryUIList, combatCamera, combatUIController, container);
         }
 
+        /// <summary>
+        /// Performs Reflex attribute injection on MonoBehaviours that cannot receive constructor injection
+        /// because they are instantiated by Unity rather than the container.
+        /// </summary>
         private static void PostBuildInjection(TickManager tickManager, InputHistoryUIList inputHistoryUIList,
             CombatCamera combatCamera, CombatUIController combatUIController,
             Container container)

@@ -16,6 +16,7 @@ namespace Systems.Combat.Combatant.Data.Editor
     internal static class CombatantMoveEditorUtils
     {
         // ── Subclass cache (keyed by base type, built once per session) ────────────────
+        /// <summary>Per-session reflection cache mapping a base type to all its concrete non-generic subclasses.</summary>
         private static readonly Dictionary<Type, List<Type>> SubclassCache = new();
 
         // ── Stats-type resolution ──────────────────────────────────────────────────────
@@ -106,6 +107,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             menu.ShowAsContext();
         }
 
+        /// <summary>Assigns an instance of <paramref name="type"/> (or null) to the property at <paramref name="path"/> and applies the change.</summary>
         private static void ApplyType(SerializedObject so, string path, Type type)
         {
             var prop = so.FindProperty(path);
@@ -134,6 +136,10 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Subclass cache ─────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Returns all concrete, non-generic subclasses of <paramref name="baseType"/> across all
+        /// loaded assemblies, ordered by namespace then name. Results are cached after the first call.
+        /// </summary>
         private static List<Type> GetSubclasses(Type baseType)
         {
             if (SubclassCache.TryGetValue(baseType, out var cached)) return cached;

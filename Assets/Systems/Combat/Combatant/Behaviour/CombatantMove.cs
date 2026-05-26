@@ -11,16 +11,32 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Behaviour
 {
+    /// <summary>
+    /// Result of a move input match attempt. Carries the winning specificity score and the
+    /// button and direction that triggered the match, so that <see cref="MoveRunner"/> can
+    /// reconstruct the entry input without re-reading the buffer.
+    /// </summary>
     public readonly struct MoveMatchResult
     {
+        /// <summary>Specificity score of the winning entry; negative means no match.</summary>
         public readonly int Score;
-        public readonly EButtonInput TriggerButton; // buttons from the matched entry
-        public readonly EDirectionInput TriggerDirection; // direction from the matched entry
 
+        /// <summary>Primary button from the matched input entry.</summary>
+        public readonly EButtonInput TriggerButton;
+
+        /// <summary>Primary direction from the matched input entry.</summary>
+        public readonly EDirectionInput TriggerDirection;
+
+        /// <summary>True when a valid entry matched (score is zero or positive).</summary>
         public bool IsMatch => Score >= 0;
 
+        /// <summary>Sentinel value representing a failed match.</summary>
         public static readonly MoveMatchResult None = new(-1, EButtonInput.None, EDirectionInput.Input5);
 
+        /// <summary>Constructs a successful match result.</summary>
+        /// <param name="score">Specificity score of the winning entry.</param>
+        /// <param name="button">Primary button that triggered the match.</param>
+        /// <param name="direction">Primary direction that triggered the match.</param>
         public MoveMatchResult(int score, EButtonInput button, EDirectionInput direction)
         {
             Score = score;
@@ -29,54 +45,93 @@ namespace Systems.Combat.Combatant.Behaviour
         }
     }
 
+    /// <summary>Broad category of a move, used by the cancel resolution priority ladder.</summary>
     public enum EMoveType
     {
+        /// <summary>Idle — character is not committed to any action.</summary>
         Neutral = 0,
+        /// <summary>Walking forward.</summary>
         ForwardWalk = 1,
+        /// <summary>Walking backward.</summary>
         BackwardWalk = 2,
+        /// <summary>Ground forward dash.</summary>
         ForwardDash = 3,
+        /// <summary>Ground backward dash.</summary>
         BackwardDash = 4,
+        /// <summary>Forward jump arc.</summary>
         ForwardJump = 5,
+        /// <summary>Backward jump arc.</summary>
         BackwardJump = 6,
+        /// <summary>Neutral jump arc.</summary>
         NeutralJump = 7,
+        /// <summary>Aerial forward jump.</summary>
         ForwardAirJump = 8,
+        /// <summary>Aerial backward jump.</summary>
         BackwardAirJump = 9,
+        /// <summary>Aerial neutral jump.</summary>
         NeutralAirJump = 10,
+        /// <summary>Aerial forward dash.</summary>
         ForwardAirDash = 11,
+        /// <summary>Aerial backward dash.</summary>
         BackwardAirDash = 12,
+        /// <summary>Generic movement move (does not fit a named locomotion type).</summary>
         Movement = 13,
+        /// <summary>Standard attack move; lowest tier on the cancel ladder.</summary>
         Normal = 14,
+        /// <summary>Special move; cancels from Normal on hit.</summary>
         Special = 15,
+        /// <summary>Overdrive move; cancels from Special on hit.</summary>
         Overdrive = 16
     }
 
+    /// <summary>Determines whether a move occupies the active-commit slot or is transparent to cancels.</summary>
     public enum EMoveCommitType
     {
-        Neutral =
-            0, // The move does not put the character in an active state. This is typically used for movement moves that should not be interrupted by other moves.
+        /// <summary>
+        /// The move does not lock the player into the active-commit state. Movement and idle
+        /// moves use this so any combat move or a different common move can always preempt them.
+        /// </summary>
+        Neutral = 0,
 
-        Active =
-            1 // The move puts the character in an active state, allowing it to be interrupted by other moves according to the usual rules.
+        /// <summary>
+        /// The move occupies the active slot and is subject to the cancel priority rules
+        /// (Kara, IASA, Gatling, Whiff cancel). Used by all attacking moves.
+        /// </summary>
+        Active = 1
     }
 
+    /// <summary>Restricts which hit/blockstun states allow entry into a move.</summary>
     public enum EHitBlockConditions
     {
-        NotHitOrBlockstun =
-            0, //Default. The move can only be entered if the character is not currently in hitstun or blockstun. This is the standard behavior for most moves.
-        HitOrBlockstunOk = 1, // Allows the move to be executed no matter the hit/blockstun state.
+        /// <summary>Default. The move may only be entered when the character is not in hitstun or blockstun.</summary>
+        NotHitOrBlockstun = 0,
 
-        HitOrBlockstunOnly =
-            2, // The move can only be entered if the character is currently in hitstun or blockstun. Rarely used.
+        /// <summary>The move may be entered regardless of hitstun or blockstun state.</summary>
+        HitOrBlockstunOk = 1,
+
+        /// <summary>The move may only be entered while the character is in hitstun or blockstun. Rarely used.</summary>
+        HitOrBlockstunOnly = 2,
+
+        /// <summary>The move may only be entered while the character is in hitstun.</summary>
         HitstunOnly = 3,
+
+        /// <summary>The move may only be entered while the character is in blockstun.</summary>
         BlockstunOnly = 4
     }
 
-    ///<summary>Determines how the move can be guarded against.</summary>
+    /// <summary>Determines how the move can be guarded against.</summary>
     public enum EGuardType
     {
+        /// <summary>Can be blocked from any guard stance.</summary>
         Any = 0,
+
+        /// <summary>Can only be blocked by a standing guard.</summary>
         HighOnly = 1,
+
+        /// <summary>Can only be blocked by a crouching guard.</summary>
         LowOnly = 2,
+
+        /// <summary>Cannot be blocked.</summary>
         Unblockable = 3
     }
 
@@ -101,11 +156,20 @@ namespace Systems.Combat.Combatant.Behaviour
         /// </summary>
         [SerializeField] private List<MoveInputEntry> inputs = new();
 
+        /// <summary>
+        /// When false the move is excluded from the automatic candidate pool and can only be
+        /// entered via an explicit gatling or whiff-cancel reference. Override to gate moves
+        /// behind resource or state conditions that should not appear in normal entry.
+        /// </summary>
         public virtual bool IsRegistered { get; } = true;
 
+        /// <summary>True when both <see cref="IsRegistered"/> and <see cref="CanEnter"/> pass.</summary>
         public bool CanBeEntered => IsRegistered && CanEnter();
 
+        /// <summary>Whether this move occupies the active-commit slot; drives cancel priority.</summary>
         public EMoveCommitType CommitType => commitType;
+
+        /// <summary>Broad category used by the cancel priority ladder.</summary>
         public EMoveType Type => type;
 
         /// <summary>The character state required to enter this move (Standing, Crouching, Airborne, or Any).</summary>
@@ -191,29 +255,56 @@ namespace Systems.Combat.Combatant.Behaviour
             return false;
         }
 
+        /// <summary>Replaces the serialised move type at runtime; used by common-move factories.</summary>
         public void OverrideType(EMoveType newType) => type = newType;
+
+        /// <summary>Replaces the required character state at runtime.</summary>
         public void OverrideCharacterState(ECharacterState newState) => characterState = newState;
+
+        /// <summary>Replaces the hit/blockstun entry condition at runtime.</summary>
         public void OverrideHitBlockConditions(EHitBlockConditions newConditions) => hitBlockConditions = newConditions;
+
+        /// <summary>Replaces the commit type at runtime.</summary>
         public void OverrideCommitType(EMoveCommitType newCommitType) => commitType = newCommitType;
 
         /// <summary>Replaces the entire input definition with a new OR-level list of entries.</summary>
         public void OverrideInputs(List<MoveInputEntry> newInputs) => inputs = newInputs;
 
         // ── Runtime context ────────────────────────────────────────────────────────────
+
+        /// <summary>The combatant this move instance belongs to; set by <see cref="CloneFor"/>.</summary>
         [NonSerialized] protected CombatantBehaviour Owner;
 
+        /// <summary>Handlers registered via <see cref="OnEachTick"/>; invoked by <see cref="MoveRunner"/> every tick.</summary>
         [NonSerialized] internal readonly List<Action<TickInput>> OnTickHandlers = new();
+
+        /// <summary>Handlers registered via <see cref="OnHit"/>; invoked when a hit lands.</summary>
         [NonSerialized] internal readonly List<Action> OnHitHandlers = new();
+
+        /// <summary>Handlers registered via <see cref="OnGuard"/>; invoked when the attack is blocked.</summary>
         [NonSerialized] internal readonly List<Action> OnGuardHandlers = new();
+
+        /// <summary>Handlers registered via <see cref="OnLand"/>; invoked when the character touches the ground.</summary>
         [NonSerialized] internal readonly List<Action> OnLandHandlers = new();
+
+        /// <summary>Handlers registered via <see cref="OnExit"/>; invoked when the move ends for any reason.</summary>
         [NonSerialized] internal readonly List<Action> OnExitHandlers = new();
+
+        /// <summary>Permanent gatling cancel targets registered via <see cref="AddStaticGatlingOption"/>.</summary>
         [NonSerialized] internal readonly List<uint> StaticGatlingOptions = new();
+
+        /// <summary>Permanent whiff-cancel targets registered via <see cref="AddStaticWhiffCancelOption"/>.</summary>
         [NonSerialized] internal readonly List<uint> StaticWhiffCancelOptions = new();
+
+        /// <summary>Per-activation gatling cancel targets registered via <see cref="AddDynamicGatlingOption"/>; cleared on exit.</summary>
         [NonSerialized] internal readonly List<uint> DynamicGatlingOptions = new();
+
+        /// <summary>Per-activation whiff-cancel targets registered via <see cref="AddDynamicWhiffCancelOption"/>; cleared on exit.</summary>
         [NonSerialized] internal readonly List<uint> DynamicWhiffCancelOptions = new();
 
         // ── Initialization ────────────────────────────────────────────────────────────
 
+        /// <summary>Called once after cloning to let the move register static cancel options and cache owner references.</summary>
         internal void Initialize()
         {
             OnInitialize();
@@ -253,13 +344,16 @@ namespace Systems.Combat.Combatant.Behaviour
 
         // ── Entry point called by MoveRunner ──────────────────────────────────────────
 
+        /// <summary>Returns the <see cref="Script"/> coroutine; called by <see cref="MoveRunner"/> to start the move.</summary>
         internal IEnumerator GetScript()
         {
             return Script();
         }
 
+        /// <summary>Returns the merged union of static and dynamic gatling cancel targets for this activation.</summary>
         internal List<uint> GetGatlingOptions() => StaticGatlingOptions.Union(DynamicGatlingOptions).ToList();
 
+        /// <summary>Returns the merged union of static and dynamic whiff-cancel targets for this activation.</summary>
         internal List<uint> GetWhiffCancelOptions() =>
             StaticWhiffCancelOptions.Union(DynamicWhiffCancelOptions).ToList();
 
@@ -270,6 +364,14 @@ namespace Systems.Combat.Combatant.Behaviour
         protected abstract IEnumerator Script();
 
         // ── DSL: Pose (the blocking primitive) ────────────────────────────────────────
+
+        /// <summary>
+        /// The only blocking primitive in a move script. Yields control back to
+        /// <see cref="MoveRunner"/> and holds <paramref name="poseId"/> for <paramref name="ticks"/> ticks
+        /// before the coroutine resumes.
+        /// </summary>
+        /// <param name="poseId">Global pose ID from the character's <see cref="Animation.CombatantPoseSheet"/>.</param>
+        /// <param name="ticks">Number of simulation ticks to hold this pose.</param>
         protected static PoseYield Pose(uint poseId, int ticks)
             => new PoseYield(poseId, ticks);
 
@@ -297,11 +399,13 @@ namespace Systems.Combat.Combatant.Behaviour
         /// <summary>Run when this move ends for any reason, including cancels.</summary>
         protected void OnExit(Action handler) => OnExitHandlers.Add(handler);
 
+        /// <summary>Removes a previously registered per-tick handler.</summary>
         protected void ClearEventHandler(Action<TickInput> handler)
         {
             OnTickHandlers.RemoveAll(h => h == handler);
         }
 
+        /// <summary>Removes a previously registered hit, guard, land, or exit handler.</summary>
         protected void ClearEventHandler(Action handler)
         {
             OnHitHandlers.RemoveAll(h => h == handler);
@@ -310,6 +414,7 @@ namespace Systems.Combat.Combatant.Behaviour
             OnExitHandlers.RemoveAll(h => h == handler);
         }
 
+        /// <summary>Clears all per-activation event handlers and dynamic cancel lists; called by <see cref="MoveRunner"/> on move exit.</summary>
         public void ClearDynamicMoveState()
         {
             OnTickHandlers.Clear();
@@ -366,17 +471,28 @@ namespace Systems.Combat.Combatant.Behaviour
         /// <summary>Disallows the MoveRunner from modifying the state of the Kara-Cancel window.</summary>
         protected void OverrideKaraCancelWindow() => Owner.Runner.OverrideKaraCancel(true);
 
+        /// <summary>Registers a handler that fires when the trigger button is released while this move is active.</summary>
         protected void OnNegativeEdge(Action handler) => Owner.Runner.RegisterNegativeEdge(handler);
+
+        /// <summary>Resolves or registers the numeric ID for the move type <typeparamref name="TMoveName"/> on this combatant.</summary>
         protected uint GetMoveId<TMoveName>() => Owner.GetMoveId(typeof(TMoveName).Name);
 
         // ── DSL: Hit data ──────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Publishes <paramref name="hitData"/> to the runner so it can be registered with
+        /// <see cref="CombatManager"/> during the Active phase. Assigns a unique HitId automatically.
+        /// </summary>
         protected void SetHitData(HitData hitData)
         {
             hitData.HitId = Owner.Runner.NextHitId();
             Owner.Runner.SetHitData(hitData);
         }
 
+        /// <summary>
+        /// Convenience overload that publishes hit data and returns a <see cref="HitScope"/>
+        /// for fluent on-hit / on-guard callbacks in the script.
+        /// </summary>
         protected HitScope Hit(HitData hitData)
         {
             hitData.HitId = Owner.Runner.NextHitId();
@@ -468,28 +584,40 @@ namespace Systems.Combat.Combatant.Behaviour
         // Physics overrides — all automatically cleaned up on move exit
         // via ResetPhysicsOverrides() called in MoveRunner.Finish()
 
+        /// <summary>Zeroes all accumulated free velocity on the character controller.</summary>
         protected void HaltMomentum()
             => Owner.CharacterController.HaltMomentum();
 
+        /// <summary>Applies a gravity multiplier for the remainder of this move. Restored on exit.</summary>
         protected void SetGravityScale(float scale)
             => Owner.CharacterController.SetGravityScale(scale);
 
+        /// <summary>Disables gravity entirely for the remainder of this move. Restored on exit.</summary>
         protected void DisableGravity()
             => Owner.CharacterController.DisableGravity();
 
+        /// <summary>Re-enables gravity after a <see cref="DisableGravity"/> call.</summary>
         protected void RestoreGravity()
             => Owner.CharacterController.RestoreGravity();
 
+        /// <summary>Disables ground friction for the remainder of this move. Restored on exit.</summary>
         protected void DisableFriction()
             => Owner.CharacterController.DisableFriction();
 
+        /// <summary>Re-enables friction after a <see cref="DisableFriction"/> call.</summary>
         protected void RestoreFriction()
             => Owner.CharacterController.RestoreFriction();
 
+        /// <summary>Plays the audio event mapped to <paramref name="soundId"/> in the owner's audio sheet.</summary>
         protected void PlaySound(uint soundId) => Owner.GameManager.AudioManager.Play(Owner.audioSheet.Get(soundId));
 
         // ── Cloning ────────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Produces a deep copy of the serialised move data and binds it to <paramref name="owner"/>,
+        /// so each combatant instance gets independent runtime state. Called by
+        /// <see cref="CombatantMoveSetDefinition"/> during session initialisation.
+        /// </summary>
         internal CombatantMove CloneFor(CombatantBehaviour owner)
         {
             var json = JsonUtility.ToJson(this);

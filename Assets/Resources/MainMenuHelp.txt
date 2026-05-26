@@ -1,6 +1,6 @@
 <size=32><b>About Project Unwind</b></size>
 
-Holy Order (a.k.a. Project Unwind) is a 2.5D fighter made in Unity 6.3. It is highly inspired by Arc System Works games yet aims to be its own. Unfortunately this is a very early build and the main unique features are missing or a work in progress. This is barely a prototype.
+Project Unwind is a 2.5D fighter made in Unity 6.3. It is highly inspired by Arc System Works games yet aims to be its own. Unfortunately this is a very early build and the main unique features are missing or a work in progress. This is barely a prototype.
 
 <size=27><b>How to Play</b></size>
 

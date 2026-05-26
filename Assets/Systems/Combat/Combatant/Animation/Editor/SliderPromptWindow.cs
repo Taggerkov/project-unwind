@@ -4,13 +4,25 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Animation.Editor
 {
+    /// <summary>
+    /// Modal utility window that shows an integer slider and a Confirm button. Used by the
+    /// Scriptable Animation Editor to let the user choose a pose offset before committing a capture.
+    /// </summary>
     public class SliderPromptWindow : EditorWindow
     {
+        /// <summary>Current slider value; initialised from <see cref="ShowWindow"/> and updated by the user.</summary>
         private int _initialValue;
+
+        /// <summary>Minimum selectable slider value.</summary>
         private int _minValue;
+
+        /// <summary>Maximum selectable slider value.</summary>
         private int _maxValue;
+
+        /// <summary>Callback invoked with the confirmed integer when the user clicks Confirm.</summary>
         private Action<int> _onConfirm;
 
+        /// <summary>Opens the prompt window with the given range and initial value; invokes <paramref name="onConfirm"/> on confirmation.</summary>
         public static void ShowWindow(int initialValue, int minValue, int maxValue, Action<int> onConfirm)
         {
             var window = GetWindow<SliderPromptWindow>(true, "Select Offset", true);
@@ -23,6 +35,7 @@ namespace Systems.Combat.Combatant.Animation.Editor
             window.ShowUtility();
         }
 
+        /// <summary>Renders the slider and Confirm button; closes the window and fires <see cref="_onConfirm"/> on confirmation.</summary>
         private void OnGUI()
         {
             EditorGUILayout.Space(10);

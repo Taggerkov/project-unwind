@@ -8,14 +8,21 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Data.Editor
 {
+    /// <summary>
+    /// Custom property drawer for fields tagged with <see cref="StatsConstrainedListAttribute"/>.
+    /// Renders a <see cref="ReorderableList"/> whose add-menu is filtered to
+    /// <c>CombatantMove&lt;TStats&gt;</c> subclasses compatible with the sibling
+    /// <c>StatsTemplate</c> field on the owning object.
+    /// </summary>
     [CustomPropertyDrawer(typeof(StatsConstrainedListAttribute))]
     public sealed class StatsConstrainedListDrawer : PropertyDrawer
     {
-        // One ReorderableList per property path — drawers are shared instances.
+        /// <summary>Per-property-path ReorderableList cache; drawers are shared across Inspector redraws.</summary>
         private readonly Dictionary<string, ReorderableList> _lists = new();
 
         // ── PropertyDrawer overrides ───────────────────────────────────────────────────
 
+        /// <summary>Begins the property scope; the ReorderableList rendering is currently disabled pending refactor.</summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             Debug.Log($"Drawing {property.serializedObject.targetObject.name}.{property.propertyPath}");
@@ -24,16 +31,15 @@ namespace Systems.Combat.Combatant.Data.Editor
             // GetOrCreateList(property).DoList(position);
         }
 
+        /// <summary>Returns single-line height for now; full list height is commented out pending refactor.</summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return
-                EditorGUIUtility
-                    .singleLineHeight; // height of the header row only — elements are drawn in CombatantMoveDrawer
-            // return GetOrCreateList(property).GetHeight();
+            return EditorGUIUtility.singleLineHeight;
         }
 
         // ── List construction ─────────────────────────────────────────────────────────
 
+        /// <summary>Returns a cached <see cref="ReorderableList"/> for this property, creating and configuring it on first access.</summary>
         private ReorderableList GetOrCreateList(SerializedProperty property)
         {
             string key =
@@ -108,6 +114,10 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Add menu ──────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Shows a stats-constrained add menu. Lists all compatible move types or a disabled
+        /// notice when no StatsTemplate is assigned or no matching types exist.
+        /// </summary>
         private static void ShowAddMenu(
             Rect buttonRect, Type statsType, SerializedObject so, string arrayPath)
         {

@@ -101,6 +101,7 @@ namespace Systems.Input
         private void Awake()
         {
             PlayerInputProvider = new PlayerInputProvider(playerInput);
+            inputSystemUIInputModule.moveRepeatDelay = float.MaxValue;
         }
 
         private async UniTaskVoid OnPlayerNavigate(InputAction.CallbackContext context)

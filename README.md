@@ -8,7 +8,7 @@ All game logic is pure C# running on a fixed 60 Hz tick system; Unity handles re
 
 ## Links
 
-- **Play WebGL build:** [GitHub Pages](https://taggerkov.github.io/project-unwind/)
+- **Play WebGL build:** [GitHub Pages](https://taggerkov.github.io/project-unwind/) (tested on Windows: Firefox / Edge)
 - **Demo video:** [YouTube](https://youtu.be/4-222222222)
 
 ## Blog Posts
@@ -40,6 +40,8 @@ notation in character space (6 is always toward the opponent).
 Open the project in Unity 6.3 (URP). There is no CLI build; use the Unity Editor. After cloning, run
 `configure-unity-git.sh` once to set up the git hooks.
 
+Use the Game.unity scene to play the game.
+
 ## Third-Party Code
 
 Pulled via the Unity Package Manager (see `Packages/manifest.json` for exact versions):
@@ -62,12 +64,17 @@ System.ComponentModel.Annotations, System.Threading.Channels.
 
 ## Third-Party Assets and Tutorials
 
-<!-- TODO: list Project Unwind's own third-party assets and any tutorials followed. -->
+
 
 ## Roll-a-Ball Demo
 
 Blog 1 documents a different, self-contained demo project built earlier in the course. It lives in its own repository,
 and its documentation, including its third-party asset and tutorial credits, is in that repository's README.
+
+## Screenshots
+
+![MainMenu from Dev Pov](Blogs/Resources/RM_devMain.png)
+![Combat from Dev PoV](Blogs/Resources/RM_devCombat.png)
 
 ## Author
 

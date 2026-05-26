@@ -9,74 +9,106 @@ using Systems.Common;
 using Systems.Core.ResourceManagement;
 using Systems.CPU;
 using Systems.Input;
-using Systems.UI.CombatantSelect;
-using Systems.UI.MainMenu;
-using Systems.UI.Transition;
+using Systems.UI;
+using Systems.UI.Menu.CombatantSelect;
+using Systems.UI.Menu.MainMenu;
 using UnityEngine;
 
 namespace Systems.Core
 {
+    /// <summary>Top-level game phase, driven by <see cref="GameManager"/>.</summary>
     public enum GameState
     {
+        /// <summary>The title screen is active.</summary>
         MainMenu,
+
+        /// <summary>The combatant and stage selection screen is active.</summary>
         CharacterSelect,
+
+        /// <summary>A combat round is in progress.</summary>
         Combat
     }
 
+    /// <summary>
+    /// Top-level state machine that transitions between main menu, character select, and combat.
+    /// Owns the <see cref="CombatSession"/> lifetime and orchestrates audio playlist switches at
+    /// each state boundary. All navigation is driven by events from <see cref="UIManager"/> screens.
+    /// </summary>
     public class GameManager : IDisposable
     {
+        /// <summary>Used to pass to callers that need a direct audio reference (e.g. UI sound triggers).</summary>
         private readonly AudioManager _audioManager;
+
+        /// <summary>Controls which music playlist is active at each game state.</summary>
         private readonly MusicManager _musicManager;
+
+        /// <summary>KCC physics settings applied globally at construction.</summary>
         private readonly KCCSettings _kccSettings;
 
-        private readonly MainMenuManager _mainMenuManager;
-        private readonly CombatantSelectManager _combatantSelectManager;
+        /// <summary>Drives the active menu screen and the fade transition between them.</summary>
+        private readonly UIManager _uiManager;
+
+        /// <summary>The main menu screen instance shown at game start and after combat.</summary>
+        private readonly MainMenuScreen _mainMenuScreen;
+
+        /// <summary>The character and stage selection screen.</summary>
+        private readonly CombatantSelectScreen _characterSelectScreen;
+
+        /// <summary>Runs the combat simulation and exposes its lifecycle events.</summary>
         private readonly CombatManager _combatManager;
 
+        /// <summary>Source of player join and leave notifications used when assigning input providers.</summary>
         private readonly PlayerRegistry _playerRegistry;
 
-        private TransitionManager _transitionManager;
-
+        /// <summary>Active combat session; non-null while in the Combat state, null otherwise.</summary>
         private CombatSession _combatSession;
 
+        /// <summary>Exposes the audio manager for systems that require a direct reference.</summary>
         public AudioManager AudioManager => _audioManager;
 
+        /// <summary>Raised whenever <see cref="CurrentGameState"/> changes.</summary>
         public event Action<GameState> OnGameStateChanged;
 
+        /// <summary>The phase the game is currently in.</summary>
         public GameState CurrentGameState { get; private set; }
 
-
+        /// <summary>
+        /// Applies KCC settings globally, then starts the main menu flow.
+        /// </summary>
         public GameManager(AudioManager audioManager, MusicManager musicManager, KCCSettings kccSettings,
-            MainMenuCanvas mainMenuCanvas, CombatantSelectManager combatantSelectManager, CombatManager combatManager,
-            PlayerRegistry playerRegistry, TransitionOverlay transitionOverlay)
+            UIManager uiManager, MainMenuScreen mainMenuScreen, CombatantSelectScreen characterSelectScreen,
+            CombatManager combatManager, PlayerRegistry playerRegistry)
         {
             _audioManager = audioManager;
             _musicManager = musicManager;
             _kccSettings = kccSettings;
-            _combatantSelectManager = combatantSelectManager;
+            _uiManager = uiManager;
+            _mainMenuScreen = mainMenuScreen;
+            _characterSelectScreen = characterSelectScreen;
             _combatManager = combatManager;
             _playerRegistry = playerRegistry;
-
-            _mainMenuManager = new MainMenuManager(mainMenuCanvas, playerRegistry);
-
-            _transitionManager = new TransitionManager(transitionOverlay);
 
             KinematicCharacterSystem.Settings = _kccSettings;
 
             BeginMainMenu().Forget();
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
-            _mainMenuManager.Dispose();
             Debug.Log("GameManager: Dispose()");
         }
 
+        /// <summary>
+        /// Called when the character select screen signals that a valid encounter is ready.
+        /// Assigns input providers from connected players (CPU fills any missing slot) and
+        /// transitions to combat.
+        /// </summary>
         private async void HandleEncounterReady(CombatEncounterData encounterData)
         {
             try
             {
-                _combatantSelectManager.OnEncounterReady -= HandleEncounterReady;
+                _characterSelectScreen.OnEncounterReady -= HandleEncounterReady;
 
                 var linkerList = GetAllPlayers();
 
@@ -106,42 +138,42 @@ namespace Systems.Core
             }
         }
 
-
+        /// <summary>Returns all currently joined players from the registry.</summary>
         private List<PlayerLinker> GetAllPlayers()
         {
             return _playerRegistry.GetAllPlayers();
         }
 
+        /// <summary>
+        /// Transitions to the main menu: activates the menu playlist, wires screen events,
+        /// and shows the main menu screen via a fade.
+        /// </summary>
         public async UniTask BeginMainMenu()
         {
-            await _transitionManager.BeginLoading();
-
             CurrentGameState = GameState.MainMenu;
             OnGameStateChanged?.Invoke(CurrentGameState);
 
             _musicManager.ActivatePlaylist(PlaylistType.Menu).Forget();
 
-            _mainMenuManager.OnPlayRequested -= HandlePlayRequested;
-            _mainMenuManager.OnPlayRequested += HandlePlayRequested;
-            _mainMenuManager.OnQuitRequested -= HandleQuitRequested;
-            _mainMenuManager.OnQuitRequested += HandleQuitRequested;
-            _mainMenuManager.Begin();
+            _mainMenuScreen.OnPlayRequested -= HandlePlayRequested;
+            _mainMenuScreen.OnPlayRequested += HandlePlayRequested;
+            _mainMenuScreen.OnQuitRequested -= HandleQuitRequested;
+            _mainMenuScreen.OnQuitRequested += HandleQuitRequested;
 
-            _transitionManager.EndLoading();
+            await _uiManager.Show(_mainMenuScreen);
         }
 
+        /// <summary>Unsubscribes main menu events and transitions to character select.</summary>
         private async void HandlePlayRequested()
         {
             UnsubscribeMainMenu();
-
-            await _transitionManager.BeginLoading(); // dip to black before hiding the menu
-            _mainMenuManager.End();
-
             await BeginCharacterSelect();
-
-            _transitionManager.EndLoading();
         }
 
+        /// <summary>
+        /// Exits play mode in the Editor, redirects to the project page on WebGL, or
+        /// calls <c>Application.Quit</c> on standalone builds.
+        /// </summary>
         private void HandleQuitRequested()
         {
             UnsubscribeMainMenu();
@@ -154,30 +186,42 @@ namespace Systems.Core
 #endif
         }
 
+        /// <summary>Removes both main menu event subscriptions.</summary>
         private void UnsubscribeMainMenu()
         {
-            _mainMenuManager.OnPlayRequested -= HandlePlayRequested;
-            _mainMenuManager.OnQuitRequested -= HandleQuitRequested;
+            _mainMenuScreen.OnPlayRequested -= HandlePlayRequested;
+            _mainMenuScreen.OnQuitRequested -= HandleQuitRequested;
         }
 
+        /// <summary>
+        /// Transitions to character select: activates the menu playlist, wires the encounter-ready
+        /// event, and shows the character select screen via a fade.
+        /// </summary>
         public async UniTask BeginCharacterSelect()
         {
-            await _transitionManager.BeginLoading();
-
             CurrentGameState = GameState.CharacterSelect;
             OnGameStateChanged?.Invoke(CurrentGameState);
 
             _musicManager.ActivatePlaylist(PlaylistType.Menu).Forget();
-            _combatantSelectManager.Begin();
-            _combatantSelectManager.OnEncounterReady += HandleEncounterReady;
 
-            _transitionManager.EndLoading();
+            _characterSelectScreen.OnEncounterReady -= HandleEncounterReady;
+            _characterSelectScreen.OnEncounterReady += HandleEncounterReady;
+
+            await _uiManager.Show(_characterSelectScreen);
         }
 
+        /// <summary>
+        /// Fades to black, exits the current screen, loads and activates the combat session,
+        /// starts the combat playlist and the combat simulation, then fades back in.
+        /// </summary>
+        /// <param name="encounterData">Addressable references for the two combatants and the stage.</param>
+        /// <param name="combatant0InputProvider">Input provider for the first combatant; may be null.</param>
+        /// <param name="combatant1InputProvider">Input provider for the second combatant; may be null.</param>
         public async UniTask BeginCombat(CombatEncounterData encounterData,
             IInputProvider combatant0InputProvider, IInputProvider combatant1InputProvider)
         {
-            await _transitionManager.BeginLoading(); // screen goes black first
+            await _uiManager.BeginLoading();
+            _uiManager.ExitCurrent();
 
             _combatSession = await CombatSession.LoadAsync(encounterData,
                 onProgress: p => Debug.Log($"Loading: {p:P0}"));
@@ -191,22 +235,24 @@ namespace Systems.Core
             _musicManager.ActivatePlaylist(PlaylistType.Combat).Forget();
             _combatManager.StartCombat();
 
-            _transitionManager.EndLoading();
+            _uiManager.EndLoading();
         }
 
+        /// <summary>
+        /// Called when combat ends: fades to black, cleans up the combat manager, disposes
+        /// the session, and returns to the main menu.
+        /// </summary>
         private async void HandleCombatEnded()
         {
             _combatManager.OnCombatEnded -= HandleCombatEnded;
 
-            await _transitionManager.BeginLoading();
+            await _uiManager.BeginLoading();
 
             _combatManager.Cleanup();
             await _combatSession.DisposeAsync();
             _combatSession = null;
 
             await BeginMainMenu();
-
-            _transitionManager.EndLoading();
         }
     }
 }

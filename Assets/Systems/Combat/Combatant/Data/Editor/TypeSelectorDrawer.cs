@@ -7,30 +7,44 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Data.Editor
 {
+    /// <summary>
+    /// Custom property drawer for <c>[SerializeReference]</c> fields tagged with
+    /// <see cref="TypeSelector"/>. Renders a dropdown for selecting the concrete managed-reference
+    /// type, then (when <see cref="TypeSelector.DrawChildren"/> is true) delegates child rendering
+    /// to a registered <see cref="PropertyDrawer"/> for the concrete type or falls back to
+    /// drawing each visible child individually.
+    /// </summary>
     [CustomPropertyDrawer(typeof(TypeSelector))]
     public class TypeSelectorDrawer : PropertyDrawer
     {
         // ── Subclass cache (per base type, built once) ─────────────────────────────────
+        /// <summary>Per-session cache mapping a base type to its concrete non-generic subclasses.</summary>
         private static readonly Dictionary<Type, List<Type>> SubclassCache = new();
 
         // ── Custom-drawer cache (per concrete type, built once) ────────────────────────
-        // null sentinel means "no custom drawer found for this type".
+        /// <summary>Per-session cache mapping a concrete type to its registered PropertyDrawer (null when none found).</summary>
         private static readonly Dictionary<Type, PropertyDrawer> TypeDrawerCache = new();
 
         // Reflection handles into CustomPropertyDrawer's private backing fields,
         // used to read which type a drawer targets and whether it covers children.
+        /// <summary>Reflection handle to <c>CustomPropertyDrawer.m_Type</c>; used to match drawers to types.</summary>
         private static readonly FieldInfo s_CpdType =
             typeof(CustomPropertyDrawer).GetField("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
 
+        /// <summary>Reflection handle to <c>CustomPropertyDrawer.m_UseForChildren</c>; used for inheritance-aware drawer lookup.</summary>
         private static readonly FieldInfo s_CpdUseForChildren =
             typeof(CustomPropertyDrawer).GetField("m_UseForChildren", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // ── Layout constants ───────────────────────────────────────────────────────────
+        /// <summary>Pixel height of the type-selector dropdown row.</summary>
         private const float DropdownHeight = 20f;
+
+        /// <summary>Vertical gap between child property rows.</summary>
         private const float Spacing = 2f;
 
         // ── GUI ────────────────────────────────────────────────────────────────────────
 
+        /// <summary>Renders the type dropdown and, when applicable, the child properties of the selected type.</summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.ManagedReference)
@@ -58,6 +72,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             EditorGUI.EndProperty();
         }
 
+        /// <summary>Returns the total height: dropdown row plus child area when <see cref="TypeSelector.DrawChildren"/> is true and a value is assigned.</summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.ManagedReference)
@@ -76,6 +91,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Dropdown drawing ───────────────────────────────────────────────────────────
 
+        /// <summary>Renders the label and type-selector button. Opens a context menu on click.</summary>
         private void DrawTypeDropdown(Rect rect, SerializedProperty property, GUIContent label)
         {
             var baseType = GetManagedReferenceBaseType(property);
@@ -94,6 +110,7 @@ namespace Systems.Combat.Combatant.Data.Editor
                 ShowTypeMenu(property, baseType, currentType);
         }
 
+        /// <summary>Builds and shows a context menu listing all concrete subclasses of <paramref name="baseType"/>, with the current type checked.</summary>
         private static void ShowTypeMenu(SerializedProperty property, Type baseType, Type currentType)
         {
             var menu = new GenericMenu();
@@ -111,6 +128,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             menu.ShowAsContext();
         }
 
+        /// <summary>Assigns an instance of <paramref name="type"/> (or null) to <paramref name="property"/> and applies the change.</summary>
         private static void SetType(SerializedProperty property, Type type)
         {
             property.managedReferenceValue = type != null ? Activator.CreateInstance(type) : null;
@@ -224,6 +242,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Reflection helpers ─────────────────────────────────────────────────────────
 
+        /// <summary>Returns all concrete non-generic subclasses of <paramref name="baseType"/> across loaded assemblies, cached after first call.</summary>
         private static List<Type> GetSubclasses(Type baseType)
         {
             if (SubclassCache.TryGetValue(baseType, out var cached)) return cached;
@@ -240,6 +259,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             return result;
         }
 
+        /// <summary>Returns the assembly's types, or an empty array when a <see cref="ReflectionTypeLoadException"/> is thrown.</summary>
         private static IEnumerable<Type> SafeGetTypes(Assembly assembly)
         {
             try
@@ -252,6 +272,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             }
         }
 
+        /// <summary>Parses <c>managedReferenceFieldTypename</c> to resolve and return the declared field type.</summary>
         private static Type GetManagedReferenceBaseType(SerializedProperty property)
         {
             var parts = property.managedReferenceFieldTypename.Split(' ');
@@ -272,6 +293,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Iteration helpers ──────────────────────────────────────────────────────────
 
+        /// <summary>Yields each visible direct child property of <paramref name="parent"/> without recursing into grandchildren.</summary>
         private static IEnumerable<SerializedProperty> IterateVisibleChildren(SerializedProperty parent)
         {
             var current = parent.Copy();
@@ -288,6 +310,7 @@ namespace Systems.Combat.Combatant.Data.Editor
 
         // ── Display helpers ────────────────────────────────────────────────────────────
 
+        /// <summary>Converts a PascalCase type name into a spaced label, inserting spaces before capitals and around "Move".</summary>
         private static string NiceName(Type type)
         {
             if (type == null) return "None";
@@ -295,6 +318,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             return System.Text.RegularExpressions.Regex.Replace(name, "(?<=[a-z])([A-Z])", " $1");
         }
 
+        /// <summary>Returns a slash-delimited menu path of the form <c>Namespace/Nice Name</c> for use in a <see cref="GenericMenu"/>.</summary>
         private static string GetMenuPath(Type type)
         {
             var ns = type.Namespace ?? "Global";

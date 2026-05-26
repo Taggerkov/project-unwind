@@ -24,7 +24,7 @@ namespace Systems.Audio.Music
         internal bool HasPlaylist => Playlist is { Length: > 0 };
 
         /// <summary>When true, <see cref="Advance"/> picks a random track instead of the sequential next one.</summary>
-        internal bool ShuffleEnabled { get; private set; }
+        internal bool ShuffleEnabled { get; private set; } = true;
 
         /// <summary>Exposes the raw array so PlaylistLoader can unload it on playlist change.</summary>
         internal AudioEvent[] Playlist { get; private set; }

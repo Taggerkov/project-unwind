@@ -8,55 +8,101 @@ using Random = UnityEngine.Random;
 
 namespace Systems.CPU
 {
+    /// <summary>
+    /// AI-driven <see cref="IInputProvider"/> that controls a combatant's direction and button inputs
+    /// each tick. Cycles through three behavioural phases — Reposition, ExecuteMotion, CoolDown —
+    /// and responds to opponent move events to decide whether to guard or counter. Attack selection is
+    /// range-filtered and probability-gated via <see cref="CpuPersonality"/> tuning parameters.
+    /// </summary>
     public sealed class CpuInputProvider : IInputProvider
     {
         // ── Configuration ──────────────────────────────────────────────────────────────
 
+        /// <summary>The combatant this AI drives.</summary>
         private readonly CombatantBehaviour _self;
+
+        /// <summary>The combatant being fought; used for spatial calculations and move-event subscriptions.</summary>
         private readonly CombatantBehaviour _opponent;
+
+        /// <summary>Tuning parameters: aggression, guard sensitivity, preferred distance, cooldowns, etc.</summary>
         private readonly CpuPersonality _personality;
-        private readonly CpuMoveHintSheet _hintSheet; // may be null → AI only walks/blocks
+
+        /// <summary>Per-move attack data; null means the AI can only walk and block.</summary>
+        private readonly CpuMoveHintSheet _hintSheet;
+
+        /// <summary>Per-move defence hints consulted on each opponent move start.</summary>
         private readonly CpuDefenceHintSheet _defenceSheet;
 
         // ── IInputProvider ──────────────────────────────────────────────────────────────
+
+        /// <inheritdoc/>
         public InputBuffer Buffer { get; } = new();
+
+        /// <inheritdoc/>
         public EInputProviderType ProviderType => EInputProviderType.Cpu;
 
         // ── AI state ────────────────────────────────────────────────────────────────────
 
+        /// <summary>Behavioural phase that gates what the AI may do on a given tick.</summary>
         private enum Phase
         {
+            /// <summary>Walking toward or away from the opponent to reach <see cref="CpuPersonality.PreferredDistance"/>.</summary>
             Reposition,
+            /// <summary>Feeding a multi-step motion sequence to the input buffer.</summary>
             ExecuteMotion,
+            /// <summary>Waiting for <see cref="_globalCooldown"/> to expire before attempting another attack.</summary>
             CoolDown
         }
 
+        /// <summary>Current behavioural phase.</summary>
         private Phase _phase = Phase.Reposition;
 
-        private int _globalCooldown = 0; // ticks until next attack attempt is allowed
-        private int _reactionDelay = 0; // ticks remaining before we act on a seen threat
-        private bool _guardDecided = false; // remembered guard roll for the current Active phase
+        /// <summary>Ticks remaining before the next attack attempt is allowed.</summary>
+        private int _globalCooldown = 0;
+
+        /// <summary>Ticks remaining before the AI acts on a detected threat; simulates human reaction time.</summary>
+        private int _reactionDelay = 0;
+
+        /// <summary>Whether the guard roll has already been committed for the current threat.</summary>
+        private bool _guardDecided = false;
+
+        /// <summary>Result of the guard roll for the current threat; false means the AI chose not to block.</summary>
         private bool _guardThisThreat = false;
 
+        /// <summary>Direction output from the previous tick; used to compute <see cref="DirectionState"/> deltas.</summary>
         private EDirectionInput _prevDirection = EDirectionInput.None;
+
+        /// <summary>Button flags from the previous tick; used to compute pressed/released transitions.</summary>
         private EButtonInput _prevButtons = EButtonInput.None;
 
+        /// <summary>Motion sequencer that feeds multi-step direction inputs (e.g. QCF) over successive ticks.</summary>
         private readonly CpuMotionPlayer _motion = new();
+
+        /// <summary>Move hint selected for the current attack sequence; null when not attacking.</summary>
         private CpuMoveHintEntry _pendingAttack;
 
         // ── Threat tracking ──────────────────────────────────────────────────────────────
+
+        /// <summary>True while the opponent's active move has been classified as a threat.</summary>
         private bool _threatActive = false;
-        private CombatantMove _currentThreatMove = null; // used for defence sheet lookup
+
+        /// <summary>Cached move reference used during threat tracking; null when no threat is active.</summary>
+        private CombatantMove _currentThreatMove = null;
+
+        /// <summary>Defence hint resolved for the current threat at move-start.</summary>
         private CpuDefenceHintEntry _pendingDefence;
+
+        /// <summary>True after the AI commits to blocking; remains set until blockstun ends via <see cref="HandleSelfBlockStunEnded"/>.</summary>
         private bool _committedToBlock = false;
 
         // ── Construction ────────────────────────────────────────────────────────────────
 
+        /// <summary>Creates a CPU provider and subscribes to combatant move events to track threats.</summary>
         /// <param name="self">The combatant this AI is controlling.</param>
         /// <param name="opponent">The combatant being fought.</param>
-        /// <param name="personality">Tuning data. Must not be null.</param>
-        /// <param name="hintSheet">Per-move attack hints. May be null for a purely defensive/walking AI.</param>
-        /// <param name="defenceSheet">Per-move defence hints.
+        /// <param name="personality">Tuning data; must not be null.</param>
+        /// <param name="hintSheet">Per-move attack hints; may be null for a purely defensive/walking AI.</param>
+        /// <param name="defenceSheet">Per-move defence hints; may be null to skip all threat classification.</param>
         public CpuInputProvider(
             CombatantBehaviour self,
             CombatantBehaviour opponent,
@@ -75,7 +121,7 @@ namespace Systems.CPU
             _opponent.Runner.OnMoveFinished += HandleOpponentMoveFinished;
         }
 
-// Call this when the AI is torn down to avoid leaked subscriptions.
+        /// <summary>Unsubscribes all combatant event listeners; call this when the AI is torn down.</summary>
         public void Dispose()
         {
             _self.OnBlockstunEnded -= HandleSelfBlockStunEnded;
@@ -83,6 +129,10 @@ namespace Systems.CPU
             _opponent.Runner.OnMoveFinished -= HandleOpponentMoveFinished;
         }
 
+        /// <summary>
+        /// Clears the block commitment and guard roll on blockstun exit so the next threat
+        /// gets a fresh decision rather than inheriting the one that caused this block.
+        /// </summary>
         private void HandleSelfBlockStunEnded()
         {
             _committedToBlock = false;
@@ -92,6 +142,11 @@ namespace Systems.CPU
             _guardThisThreat = false;
         }
 
+        /// <summary>
+        /// Resolves the defence entry and classifies the opponent's new move as a threat or not.
+        /// Unknown moves and explicitly Ignored entries are treated as non-threats.
+        /// Starts the reaction delay timer when a new threat is detected.
+        /// </summary>
         private void HandleOpponentMoveStarted(CombatantMove move)
         {
             // Resolve the defence entry at move-start so we know whether to treat this as a threat.
@@ -112,6 +167,7 @@ namespace Systems.CPU
                 _reactionDelay = _personality.ReactionDelayTicks;
         }
 
+        /// <summary>Clears all threat state when the opponent's move ends.</summary>
         private void HandleOpponentMoveFinished(CombatantMove move)
         {
             _threatActive = false;
@@ -123,6 +179,10 @@ namespace Systems.CPU
 
         // ── IInputProvider.UpdateFrameInput ─────────────────────────────────────────────
 
+        /// <summary>
+        /// Called once per tick by the input system. Ticks cooldowns, runs the decision tree,
+        /// writes the result to <see cref="Buffer"/>, and returns the computed <see cref="TickInput"/>.
+        /// </summary>
         public TickInput UpdateFrameInput()
         {
             TickCooldowns();
@@ -132,7 +192,6 @@ namespace Systems.CPU
 
             Buffer.Write(tick);
 
-            // Update history after writing — these become "previous" on the next tick.
             _prevDirection = direction;
             _prevButtons = buttons;
 
@@ -141,6 +200,10 @@ namespace Systems.CPU
 
         // ── Main decision ────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Priority-ordered decision tree executed each tick. Returns the direction and button flags
+        /// the AI wants to output this frame. Priorities: stunned → in-motion → defend → attack → reposition.
+        /// </summary>
         private (EDirectionInput direction, EButtonInput buttons) Think()
         {
             // ── Priority 1: stunned ───────────────────────────────────────────────────
@@ -187,6 +250,9 @@ namespace Systems.CPU
         // ── Threat handling ───────────────────────────────────────────────────────────
 
         /// <summary>
+        /// Returns true and sets <paramref name="response"/> when the AI should defend this tick:
+        /// a threat is active, the reaction delay has expired, and the guard roll succeeded.
+        /// Resets the guard decision when no threat is present so the next threat gets a fresh roll.
         /// </summary>
         private bool TryGetDefenceResponse(out EDefenceResponse response)
         {
@@ -211,6 +277,10 @@ namespace Systems.CPU
             return true;
         }
 
+        /// <summary>
+        /// Translates a confirmed <see cref="EDefenceResponse"/> into concrete direction and button outputs.
+        /// CounterMove falls back to guarding when no valid counter entry exists or the counter is on cooldown.
+        /// </summary>
         private (EDirectionInput, EButtonInput) ExecuteDefenceResponse(EDefenceResponse response)
         {
             switch (response)
@@ -251,6 +321,7 @@ namespace Systems.CPU
 
         // ── Attack ────────────────────────────────────────────────────────────────────
 
+        /// <summary>Returns true with probability proportional to <see cref="CpuPersonality.Aggression"/>.</summary>
         private bool RollAggression()
             => Random.Range(0, 100) < _personality.Aggression;
 
@@ -279,6 +350,11 @@ namespace Systems.CPU
             return best;
         }
 
+        /// <summary>
+        /// Starts the attack sequence for <paramref name="hint"/>: applies cooldowns, sets the phase,
+        /// and either outputs an instant button press (no motion required) or starts the
+        /// <see cref="_motion"/> sequence and returns its first step.
+        /// </summary>
         private (EDirectionInput direction, EButtonInput buttons) BeginMove(CpuMoveHintEntry hint)
         {
             _pendingAttack = hint;
@@ -296,11 +372,9 @@ namespace Systems.CPU
                 return (EDirectionInput.Input5, hint.Button);
             }
 
-            // Start the motion sequence; Advance() will feed directions over the coming ticks.
             bool facingRight = _self.StateMachine.FacingDirection == EFacingDirection.Right;
             _motion.StartMotion(hint.RequiredMotion, facingRight);
 
-            // Return the first step of the motion immediately.
             var (dir, press) = _motion.Advance();
             var btn = press ? hint.Button : EButtonInput.None;
             return (dir, btn);
@@ -308,24 +382,31 @@ namespace Systems.CPU
 
         // ── Repositioning ─────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Returns the direction input that moves toward the preferred engagement range.
+        /// Idles when within the distance tolerance band.
+        /// </summary>
         private EDirectionInput RepositionDirection(float distance)
         {
             float target = _personality.PreferredDistance;
             float tolerance = _personality.DistanceTolerance;
 
-            if (distance > target + tolerance) return DirectionToward(); // too far → close in
-            if (distance < target - tolerance) return DirectionAway(); // too close → back off
-            return EDirectionInput.Input5; // in the sweet spot → idle
+            if (distance > target + tolerance) return DirectionToward();
+            if (distance < target - tolerance) return DirectionAway();
+            return EDirectionInput.Input5;
         }
 
         // ── Cooldown ticking ──────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Decrements all cooldown counters and advances the phase from CoolDown to Reposition
+        /// once the global cooldown expires. Also decrements per-move cooldowns in the hint sheet.
+        /// </summary>
         private void TickCooldowns()
         {
             if (_globalCooldown > 0) _globalCooldown--;
             if (_reactionDelay > 0) _reactionDelay--;
 
-            // Phase transitions
             if (_phase == Phase.CoolDown && _globalCooldown <= 0)
                 _phase = Phase.Reposition;
 
@@ -338,8 +419,8 @@ namespace Systems.CPU
         // ── Spatial helpers ───────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Converts raw AI intent (flat direction + button flags) into a fully temporal
-        /// TickInput by comparing against the previous frame's outputs.
+        /// Converts raw direction and button flags into a <see cref="TickInput"/> by computing
+        /// pressed/released transitions against the previous tick's outputs.
         /// </summary>
         private TickInput BuildTickInput(EDirectionInput direction, EButtonInput buttons)
         {
@@ -355,6 +436,7 @@ namespace Systems.CPU
             };
         }
 
+        /// <summary>Returns a <see cref="ButtonState"/> for <paramref name="flag"/> based on the current and previous button masks.</summary>
         private ButtonState BuildButtonState(EButtonInput flag, EButtonInput current)
         {
             bool heldNow = (current & flag) != 0;
@@ -362,11 +444,12 @@ namespace Systems.CPU
             return new ButtonState
             {
                 Held = heldNow,
-                Pressed = heldNow && !heldBefore, // first frame down
-                Released = !heldNow && heldBefore, // first frame up
+                Pressed = heldNow && !heldBefore,
+                Released = !heldNow && heldBefore,
             };
         }
 
+        /// <summary>Returns the absolute horizontal distance between the two combatants.</summary>
         private float DistanceToOpponent()
             => Mathf.Abs(_opponent.transform.position.x - _self.transform.position.x);
 
@@ -384,6 +467,7 @@ namespace Systems.CPU
 
         // ── State queries ─────────────────────────────────────────────────────────────
 
+        /// <summary>True when this combatant is in hitstun or blockstun and cannot act.</summary>
         private bool IsSelfStunned()
         {
             var cs = _self.StateMachine.CombatState;

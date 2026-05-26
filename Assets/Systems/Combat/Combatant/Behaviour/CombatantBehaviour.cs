@@ -15,28 +15,57 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Behaviour
 {
+    /// <summary>
+    /// MonoBehaviour entity that represents one combatant in a fight. Wires together the
+    /// <see cref="MoveRunner"/>, <see cref="CombatantStateMachine"/>, and
+    /// <see cref="CombatantCharacterController"/>, drives the cancel system each logic tick,
+    /// converts local hitbox/hurtbox volumes to world space, and dispatches hit and stun
+    /// notifications to the combat manager.
+    /// </summary>
     [RequireComponent(typeof(KinematicCharacterMotor))]
     [RequireComponent(typeof(PoseAnimator))]
     public class CombatantBehaviour : MonoBehaviour, ITickable<CombatManager>
     {
+        /// <summary>Injected combat manager — receives hurtbox/hitbox registrations and hit events.</summary>
         [Inject] private readonly CombatManager _combatManager;
+
+        /// <summary>Injected game manager — exposed via <see cref="GameManager"/> for moves that need global state.</summary>
         [Inject] private readonly GameManager _gameManager;
 
+        /// <summary>KCC motor component; set in the Inspector and auto-populated by <see cref="OnValidate"/>.</summary>
         [field: SerializeField] public KinematicCharacterMotor Motor { get; private set; }
+
+        /// <summary>Pose animator component; set in the Inspector and auto-populated by <see cref="OnValidate"/>.</summary>
         [field: SerializeField] public PoseAnimator Animator { get; private set; }
+
+        /// <summary>ScriptableObject that defines all moves and the stats template for this character.</summary>
         [SerializeField] public CombatantMoveSetDefinition combatantMoveSetDefinition;
+
+        /// <summary>ScriptableObject containing all pose collections (bone transforms, hitboxes, hurtboxes) for this character.</summary>
         [SerializeField] public CombatantPoseSheet combatantPoseSheet;
+
+        /// <summary>Audio event mapping for this character, preloaded by <see cref="CombatManager"/> before combat starts.</summary>
         [SerializeField] public AudioSheet audioSheet;
+
+        /// <summary>Root GameObject of the visible character mesh; its Z scale is flipped to handle facing direction.</summary>
         [SerializeField] public GameObject visualRoot;
+
+        /// <summary>Root whose rotation is flipped when facing changes; hitbox/hurtbox volumes use its transform for world-space conversion.</summary>
         [SerializeField] public GameObject directionIndicatorRoot;
 
+        /// <summary>Reference to the opposing combatant, resolved once at <see cref="CombatManager.OnCombatStarted"/>.</summary>
         private CombatantBehaviour _opponent;
 
+        /// <summary>The move runner that drives the active move's coroutine tick-by-tick.</summary>
         public MoveRunner Runner => _runner;
+
+        /// <summary>State machine tracking character state (Standing/Crouching/Airborne) and combat state (Neutral/Startup/Active/…).</summary>
         public CombatantStateMachine StateMachine => _stateMachine;
 
+        /// <summary>Wraps the KCC motor with velocity helpers and grounding logic.</summary>
         public CombatantCharacterController CharacterController;
 
+        /// <summary>Exposes the injected <see cref="Systems.Core.GameManager"/> for move scripts that need global game state.</summary>
         public GameManager GameManager => _gameManager;
 
         /// <summary>
@@ -46,28 +75,58 @@ namespace Systems.Combat.Combatant.Behaviour
         /// </summary>
         public CombatantStats Stats { get; private set; }
 
+        /// <summary>Raised whenever this combatant's facing direction changes, e.g. for UI indicators or VFX.</summary>
         public Action<EFacingDirection> OnFacingDirectionChanged;
 
+        /// <summary>Raised by <see cref="MoveRunner"/> when the hitstun move finishes, so subscribers can react to recovery.</summary>
         public event Action OnHitstunEnded;
+
+        /// <summary>Raised by <see cref="MoveRunner"/> when the blockstun move finishes.</summary>
         public event Action OnBlockstunEnded;
 
-
+        /// <summary>Movement-type moves (dashes, jumps registered as combat moves) from the move set definition.</summary>
         private List<CombatantMove> _movementMoves;
+
+        /// <summary>Normal-type combat moves.</summary>
         private List<CombatantMove> _normalMoves;
+
+        /// <summary>Special-type combat moves.</summary>
         private List<CombatantMove> _specialMoves;
+
+        /// <summary>Overdrive-type combat moves.</summary>
         private List<CombatantMove> _overdriveMoves;
 
+        /// <summary>Common standing idle move.</summary>
         private CombatantMove _cmnActStand;
+
+        /// <summary>Common forward-walk move.</summary>
         private CombatantMove _cmnActFWalk;
+
+        /// <summary>Common backward-walk move.</summary>
         private CombatantMove _cmnActBWalk;
+
+        /// <summary>Common transition from standing to crouching.</summary>
         private CombatantMove _cmnStandToCrouch;
+
+        /// <summary>Common crouch idle move.</summary>
         private CombatantMove _cmnActCrouch;
+
+        /// <summary>Common transition from crouching to standing.</summary>
         private CombatantMove _cmnCrouchToStand;
+
+        /// <summary>Common pre-jump move (sets pending jump type before leaving the ground).</summary>
         private CombatantMove _cmnActJumpPre;
+
+        /// <summary>Common airborne move active during the jump arc.</summary>
         private CombatantMove _cmnActJump;
+
+        /// <summary>Common landing move played when the character returns to the ground.</summary>
         private CombatantMove _cmnActJumpLand;
 
+        /// <summary>Common hitstun move started by <see cref="NotifyGotHit"/>.</summary>
         private CombatantMove _cmnActHitstun;
+
+        /// <summary>Common blockstun move started by <see cref="NotifyBlocked"/>.</summary>
         private CombatantMove _cmnActBlockstun;
 
         /// <summary>
@@ -75,16 +134,21 @@ namespace Systems.Combat.Combatant.Behaviour
         /// </summary>
         private Dictionary<uint, CombatantMove> _moveIdCache = new();
 
+        /// <summary>Reverse map from move instance to its assigned ID.</summary>
         private Dictionary<CombatantMove, uint> _moveToIdCache = new();
 
+        /// <summary>Map from move type name to its assigned ID, used to resolve string-based lookups.</summary>
         private Dictionary<string, uint> _moveNameToIdCache = new();
-        private uint _nextMoveId = 1; // Start at 1 to avoid confusion with default(uint) == 0
+
+        /// <summary>Auto-incrementing counter for assigning move IDs; starts at 1 so 0 can serve as "no move".</summary>
+        private uint _nextMoveId = 1;
 
         /// <summary>
         /// Full list of moves in an un-ordered collection. Used for querying.
         /// </summary>
         private List<CombatantMove> _runtimeMoveList;
 
+        /// <summary>All common moves (walk, idle, jump, hitstun, blockstun) as a flat list for ID lookup.</summary>
         private List<CombatantMove> _runtimeCmnMoveList;
 
         /// <summary>
@@ -94,25 +158,40 @@ namespace Systems.Combat.Combatant.Behaviour
         private readonly List<CombatantMove> _cancelCandidates = new();
 
 
+        /// <summary>Move runner that owns the active move's coroutine and tick lifecycle.</summary>
         private readonly MoveRunner _runner = new();
+
+        /// <summary>State machine for character and combat state transitions.</summary>
         private readonly CombatantStateMachine _stateMachine = new();
 
+        /// <summary>Currently assigned input provider; defaults to a <see cref="DummyInputProvider"/> until a real one is assigned.</summary>
         private IInputProvider _inputProvider = new DummyInputProvider();
 
+        /// <summary>
+        /// Gets or sets the input provider. Setting to null falls back to a
+        /// <see cref="DummyInputProvider"/> to avoid null reference errors in move scripts.
+        /// </summary>
         public IInputProvider InputProvider
         {
             get => _inputProvider;
             set => _inputProvider = value ?? new DummyInputProvider();
         }
 
+        /// <summary>Shortcut to the input buffer of the current provider.</summary>
         private InputBuffer Buffer => InputProvider.Buffer;
 
+        /// <summary>Populates <see cref="Motor"/> and <see cref="Animator"/> from sibling components if not set in the Inspector.</summary>
         private void OnValidate()
         {
             if (!Motor) Motor = GetComponent<KinematicCharacterMotor>();
             if (!Animator) Animator = GetComponent<PoseAnimator>();
         }
 
+        /// <summary>
+        /// Builds the <see cref="CombatantCharacterController"/>, initialises the runner, clones the
+        /// stats template, instantiates all moves from the move set definition, and categorises them
+        /// into typed lists for cancel resolution.
+        /// </summary>
         private void Awake()
         {
             CharacterController = new CombatantCharacterController();
@@ -222,19 +301,33 @@ namespace Systems.Combat.Combatant.Behaviour
                 _runtimeMoveList = new List<CombatantMove>();
             }
 
-            _combatManager.OnCombatStarted += (combatant0, combatant1) =>
-            {
-                _opponent = combatant0 == this ? combatant1 : combatant0;
-            };
+            _combatManager.OnCombatStarted += HandleCombatStarted;
         }
 
+        /// <summary>Unsubscribes from <see cref="CombatManager.OnCombatStarted"/> so the destroyed instance is not GC-anchored.</summary>
+        private void OnDestroy()
+        {
+            _combatManager.OnCombatStarted -= HandleCombatStarted;
+        }
+
+        /// <summary>Resolves the opponent reference at the start of each combat session.</summary>
+        private void HandleCombatStarted(CombatantBehaviour combatant0, CombatantBehaviour combatant1)
+        {
+            _opponent = combatant0 == this ? combatant1 : combatant0;
+        }
+
+        /// <summary>Restores full HP, resets character and combat state, and cancels any in-progress move. Called at the start of each round.</summary>
         public void ResetForNewRound()
         {
-            Stats.Initialize(); //Reset HP and any character-specific stats to their initial values.
+            Stats.Initialize();
             _stateMachine.ResetForNewRound();
             _runner.ResetForNewRound();
         }
 
+        /// <summary>
+        /// Resolves the pose from <see cref="combatantPoseSheet"/> and applies it to the
+        /// <see cref="Animator"/>. Logs a warning when the pose ID is not found.
+        /// </summary>
         private void OnPoseChanged(uint id, uint collectionId, uint poseId)
         {
             if (!combatantPoseSheet || !Animator) return;
@@ -248,12 +341,17 @@ namespace Systems.Combat.Combatant.Behaviour
             }
         }
 
+        /// <summary>
+        /// Called by <see cref="MoveRunner"/> when any move starts. Updates the physical
+        /// character state for the stand-to-crouch and crouch-to-stand transition moves.
+        /// </summary>
         private void OnMoveStarted(CombatantMove move)
         {
             if (move == _cmnStandToCrouch) _stateMachine.SetPhysical(ECharacterState.Crouching);
             else if (move == _cmnCrouchToStand) _stateMachine.SetPhysical(ECharacterState.Standing);
         }
 
+        /// <summary>Raises <see cref="OnHitstunEnded"/> or <see cref="OnBlockstunEnded"/> when the corresponding common move finishes.</summary>
         private void OnMoveEnded(CombatantMove move)
         {
             if (move == _cmnActHitstun)
@@ -267,6 +365,10 @@ namespace Systems.Combat.Combatant.Behaviour
             }
         }
 
+        /// <summary>
+        /// Updates facing direction in the state machine, flips <see cref="visualRoot"/> Z scale and
+        /// <see cref="directionIndicatorRoot"/> rotation, and raises <see cref="OnFacingDirectionChanged"/>.
+        /// </summary>
         public void SetFacingDirection(EFacingDirection direction)
         {
             _stateMachine.SetFacingDirection(direction);
@@ -291,6 +393,7 @@ namespace Systems.Combat.Combatant.Behaviour
             OnFacingDirectionChanged?.Invoke(direction);
         }
 
+        /// <summary>Returns the facing direction that points this combatant toward the opponent's current position.</summary>
         public EFacingDirection GetNewFacingDirectionTowardsOpponent()
         {
             EFacingDirection newFacingDirection =
@@ -298,6 +401,11 @@ namespace Systems.Combat.Combatant.Behaviour
             return newFacingDirection;
         }
 
+        /// <summary>
+        /// Per-tick update: auto-faces the opponent when able, advances the active move, runs
+        /// the cancel system, converts local hitboxes and hurtboxes to world space, and registers
+        /// them with <see cref="CombatManager"/>.
+        /// </summary>
         public void LogicTick()
         {
             if (_stateMachine.IsAbleToTurn)
@@ -386,6 +494,7 @@ namespace Systems.Combat.Combatant.Behaviour
             }
         }
 
+        /// <summary>Iterates <paramref name="candidates"/> and returns the move with the highest match score. Returns <c>(None, null)</c> when no move matches.</summary>
         private (MoveMatchResult bestResult, CombatantMove bestMove) FindBestScoringMove(IInputView view,
             List<CombatantMove> candidates)
         {
@@ -584,6 +693,7 @@ namespace Systems.Combat.Combatant.Behaviour
             }
         }
 
+        /// <summary>Adds <paramref name="move"/> to <paramref name="candidates"/> if it is non-null and valid for the current state.</summary>
         private void TryAddCommon(List<CombatantMove> candidates, CombatantMove move)
         {
             if (move != null && IsValidForCurrentState(move, requireRegistered: false))
@@ -615,6 +725,7 @@ namespace Systems.Combat.Combatant.Behaviour
             }
         }
 
+        /// <summary>Appends every move in <paramref name="source"/> that passes the current-state validity check.</summary>
         private void AddFromList(List<CombatantMove> source, List<CombatantMove> candidates, bool requireRegistered)
         {
             foreach (var move in source)
@@ -626,11 +737,8 @@ namespace Systems.Combat.Combatant.Behaviour
         /// Returns true when <paramref name="move"/> passes all entry gates for the
         /// current character and combat state.
         /// </summary>
-        /// <param name="requireRegistered">
-        /// Pass false for common moves which bypass the IsRegistered system.
-        /// </param>
-        /// <param name="allowFollowup">
-        /// </param>
+        /// <param name="requireRegistered">Pass false for common moves which bypass the IsRegistered system.</param>
+        /// <param name="allowFollowup">When true, followup-only moves (e.g. throw completions) are eligible. Defaults to false to prevent them appearing in normal cancel lists.</param>
         private bool IsValidForCurrentState(CombatantMove move, bool requireRegistered = true,
             bool allowFollowup = false)
         {
@@ -662,6 +770,10 @@ namespace Systems.Combat.Combatant.Behaviour
 
         // ── Move start ─────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Cancels the currently active move (if any) and starts <paramref name="move"/> using
+        /// the provided match result and current input frame.
+        /// </summary>
         private void StartMove(CombatantMove move, MoveMatchResult matchResult, IInputView view)
         {
             if (_runner.CurrentMove != null)
@@ -689,6 +801,10 @@ namespace Systems.Combat.Combatant.Behaviour
 
         // ── Move ID registry ───────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Returns the numeric ID for the move whose type name matches <paramref name="moveName"/>,
+        /// assigning a new ID if this is the first lookup. Returns 0 and logs a warning on miss.
+        /// </summary>
         public uint GetMoveId(string moveName)
         {
             if (_moveNameToIdCache.TryGetValue(moveName, out var id))
@@ -717,6 +833,7 @@ namespace Systems.Combat.Combatant.Behaviour
             return newId;
         }
 
+        /// <summary>Returns the move instance registered under <paramref name="moveId"/>, or null with a warning if not found.</summary>
         public CombatantMove GetMoveById(uint moveId)
         {
             if (_moveIdCache.TryGetValue(moveId, out var move))
@@ -728,6 +845,11 @@ namespace Systems.Combat.Combatant.Behaviour
             return null;
         }
 
+        /// <summary>
+        /// Transforms a character-local <see cref="MinMaxAABB"/> into world space by applying the
+        /// <see cref="directionIndicatorRoot"/> scale and rotation and the combatant's world position.
+        /// Generates all 8 corners to produce a correct axis-aligned result after rotation.
+        /// </summary>
         public MinMaxAABB BoxToWorld(MinMaxAABB localBox)
         {
             var position = (Unity.Mathematics.float3)transform.position;
@@ -773,6 +895,11 @@ namespace Systems.Combat.Combatant.Behaviour
 
         // ── External notifications ─────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Called by <see cref="CombatManager"/> when this combatant is in a resolved hitbox–hurtbox overlap.
+        /// Returns <see cref="EHitResolution.Blocked"/> when the combatant is able to block and is holding back;
+        /// otherwise returns <see cref="EHitResolution.Hit"/>.
+        /// </summary>
         public EHitResolution NotifyIncomingHit(HitData hitData, CombatantBehaviour attacker)
         {
             var view = new CharacterInputView(Buffer, _stateMachine.FacingDirection);
@@ -787,6 +914,10 @@ namespace Systems.Combat.Combatant.Behaviour
             return EHitResolution.Hit;
         }
 
+        /// <summary>
+        /// Applies damage and hitstun context from <paramref name="hitResult"/>, applies victim knockback,
+        /// updates combat state to hitstun, and starts the <c>CmnActHitstun</c> move.
+        /// </summary>
         public void NotifyGotHit(HitResult hitResult)
         {
             if (Stats != null)
@@ -812,12 +943,17 @@ namespace Systems.Combat.Combatant.Behaviour
                 Debug.LogWarning($"{name}: no CmnActHitstun configured — character will be stuck in hitstun.");
         }
 
+        /// <summary>Applies attacker recoil knockback and notifies the runner that a hit was dealt (enabling gatling cancels).</summary>
         public void NotifyDealtHit(HitResult hitResult)
         {
             CharacterController.AddVelocity(hitResult.PerpetratorKnockback, EVelocitySpace.World);
             _runner.NotifyDealtHit();
         }
 
+        /// <summary>
+        /// Writes blockstun context into stats, applies victim knockback, updates combat state to
+        /// blockstun, and starts the <c>CmnActBlockstun</c> move.
+        /// </summary>
         public void NotifyBlocked(HitResult hitResult)
         {
             if (Stats != null)
@@ -835,27 +971,31 @@ namespace Systems.Combat.Combatant.Behaviour
                 Debug.LogWarning($"{name}: no CmnActBlockstun configured — character will be stuck in blockstun.");
         }
 
+        /// <summary>Applies attacker recoil knockback and notifies the runner the attack was blocked (enabling gatling cancels via OnGuard handlers).</summary>
         public void NotifyGotBlocked(HitResult hitResult)
         {
             CharacterController.AddVelocity(hitResult.PerpetratorKnockback, EVelocitySpace.World);
             _runner.NotifyGotBlocked();
-            _stateMachine.OnBlocked();
         }
 
 
+        /// <summary>Notifies the runner and state machine that the character has landed; triggers landing-recovery logic.</summary>
         public void NotifyLand()
         {
             _runner.NotifyLand();
             _stateMachine.OnLanded();
         }
 
+        /// <summary>Notifies the state machine that the character has become airborne.</summary>
         public void NotifyAirborne() => _stateMachine.OnBecameAirborne();
 
+        /// <summary>Raises <see cref="OnHitstunEnded"/> so subscribers can react when hitstun recovery completes.</summary>
         public void NotifyHitstunEnd()
         {
             OnHitstunEnded?.Invoke();
         }
 
+        /// <summary>Raises <see cref="OnBlockstunEnded"/> so subscribers can react when blockstun recovery completes.</summary>
         public void NotifyBlockstunEnd()
         {
             OnBlockstunEnded?.Invoke();

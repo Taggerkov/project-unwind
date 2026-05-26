@@ -5,74 +5,118 @@ using UnityEngine;
 
 namespace Systems.Combat.HitSystem
 {
+    /// <summary>Intensity tier of a hit, used for damage scaling, hitstun/blockstun selection, and damage pose selection.</summary>
     public enum EHitLevel
     {
+        /// <summary>Lightest hit tier.</summary>
         One,
+
+        /// <summary>Medium-light hit tier.</summary>
         Two,
+
+        /// <summary>Medium hit tier.</summary>
         Three,
+
+        /// <summary>Medium-heavy hit tier.</summary>
         Four,
+
+        /// <summary>Heaviest hit tier.</summary>
         Five
     }
 
+    /// <summary>Controls how the horizontal knockback direction is determined, allowing moves to be authored independent of facing.</summary>
     public enum EAttackDirection
     {
-        Self = 0, // attacker's facing defines forward
-        Player = 1, // defender's facing defines forward
-        SelfToEnemy = 2, // physical direction attacker → defender
-        PlayerToEnemy = 3 // physical direction defender → attacker
+        /// <summary>X knockback follows the attacker's facing sign.</summary>
+        Self = 0,
+
+        /// <summary>X knockback follows the defender's facing sign.</summary>
+        Player = 1,
+
+        /// <summary>X knockback pushes in the physical direction from attacker to defender.</summary>
+        SelfToEnemy = 2,
+
+        /// <summary>X knockback pushes in the physical direction from defender to attacker.</summary>
+        PlayerToEnemy = 3
     }
 
+    /// <summary>Outcome of a resolved hitbox–hurtbox overlap, determined by the defender's blocking state.</summary>
     public enum EHitResolution
     {
+        /// <summary>The hit landed and dealt damage and hitstun.</summary>
         Hit,
+
+        /// <summary>The hit was blocked; blockstun and reduced knockback applied instead.</summary>
         Blocked,
+
+        /// <summary>The hit was negated by armor; no stun or damage applied.</summary>
         Armored
     }
 
+    /// <summary>Restricts which combatants a set of hitboxes can interact with.</summary>
     public enum EHitTarget
     {
+        /// <summary>Only targets combatants considered enemies of the attacker.</summary>
         Enemy,
+
+        /// <summary>Only targets combatants considered allies of the attacker.</summary>
         Ally,
+
+        /// <summary>Targets any combatant regardless of team.</summary>
         Any
     }
 
+    /// <summary>
+    /// All parameters for a single attack interaction: damage, timing (hitstun, blockstun, hitstop),
+    /// knockback vectors (on hit and on block for both sides), hit level, guard requirements, and
+    /// the damage pose override system. Set by move scripts during the Active phase.
+    /// </summary>
     public struct HitData
     {
-        public uint
-            HitId; // Unique identifier for this hit. Used to avoid processing the same hit multiple times across multiple frames.
+        /// <summary>Unique ID assigned by the DSL. Used to prevent the same hit from being processed more than once across frames.</summary>
+        public uint HitId;
 
-        public EHitLevel
-            Level; //The level of this hit, used for scaling damage and hitstun/blockstun aswell as as clash resolution.
+        /// <summary>Hit tier; drives damage pose selection and is used for clash resolution.</summary>
+        public EHitLevel Level;
 
-        public float Damage; // The amount of damage this hit will deal if it connects before scaling.
+        /// <summary>Raw damage dealt to the victim on hit before any scaling.</summary>
+        public float Damage;
 
-        public EGuardType
-            GuardType; // The type of guard required to block this hit. If the victim's guard type matches this, the hit will be blocked instead of hitting.
+        /// <summary>Guard type the victim must hold to block this attack.</summary>
+        public EGuardType GuardType;
 
-        public EHitTarget
-            HitTarget; // The type of target this hit can affect from the point of view of the perpetrator.
+        /// <summary>Which combatants (enemy, ally, any) this hit's boxes interact with.</summary>
+        public EHitTarget HitTarget;
 
-        public uint
-            HitstunDuration; // The amount of hitstun (in ticks) that the victim will suffer if the hit connects and is not blocked.
+        /// <summary>Frames of hitstun applied to the victim when the hit connects unblocked.</summary>
+        public uint HitstunDuration;
 
-        public uint
-            BlockstunDuration; // The amount of blockstun (in ticks) that the victim will suffer if the hit is blocked.
+        /// <summary>Frames of blockstun applied to the victim when the hit is blocked.</summary>
+        public uint BlockstunDuration;
 
-        public uint
-            HitstopDurationOnBlock; // The amount of hitstop (in ticks) that the game's logic will be frozen when the hit is blocked.
+        /// <summary>Frames of global hitstop (gameplay freeze) triggered when the hit is blocked.</summary>
+        public uint HitstopDurationOnBlock;
 
-        public uint
-            HitstopDurationOnHit; // The amount of hitstop (in ticks) that the game's logic will be frozen when the hit connects.
+        /// <summary>Frames of global hitstop triggered when the hit connects.</summary>
+        public uint HitstopDurationOnHit;
 
-        public EAttackDirection AttackDirection; // how HitKnockback/BlockKnockback X is interpreted
+        /// <summary>Determines how the horizontal knockback X component maps to world space.</summary>
+        public EAttackDirection AttackDirection;
 
-        public bool
-            IsLauncher; // Whether this hit should cause the victim to be launched into the air if it connects (allows the victim to unground themselves)
+        /// <summary>When true, the hit briefly forces the victim airborne, enabling aerial combos.</summary>
+        public bool IsLauncher;
 
-        public Vector2 HitKnockback; // The knockback applied to the victim when hit connects
-        public Vector2 HitSelfKnockback; // The knockback applied to the perpetrator when hit connects
-        public Vector2 BlockKnockback; // The knockback applied to the victim when the hit is blocked
-        public Vector2 BlockSelfKnockback; // The knockback applied to the perpetrator when the hit is blocked
+        /// <summary>Knockback vector (world-space X resolved at runtime) applied to the victim on hit.</summary>
+        public Vector2 HitKnockback;
+
+        /// <summary>Knockback vector applied to the attacker on hit (recoil).</summary>
+        public Vector2 HitSelfKnockback;
+
+        /// <summary>Knockback vector applied to the victim when the hit is blocked.</summary>
+        public Vector2 BlockKnockback;
+
+        /// <summary>Knockback vector applied to the attacker when the hit is blocked (pushback).</summary>
+        public Vector2 BlockSelfKnockback;
 
         /// <summary>
         /// When true, the victim is forced into DamagePoseOverrideId instead of the
@@ -84,8 +128,10 @@ namespace Systems.Combat.HitSystem
         /// <summary>Global pose ID (collectionId * 100 + poseId) to use when OverrideDamagePose is true.</summary>
         public uint DamagePoseOverrideId;
 
-        public uint ComboCounterIncrease; // The amount the combo counter will increase by if this hit connects.
+        /// <summary>How much the combo counter increments when this hit connects.</summary>
+        public uint ComboCounterIncrease;
 
+        /// <summary>Returns a <see cref="HitData"/> pre-configured for a light attack (level 1, 20 damage, 9 hitstun).</summary>
         public static HitData LightAttack() => new()
         {
             Level = EHitLevel.One,
@@ -103,6 +149,7 @@ namespace Systems.Combat.HitSystem
             ComboCounterIncrease = 1
         };
 
+        /// <summary>Returns a <see cref="HitData"/> pre-configured for a medium attack (level 2, 35 damage, 16 hitstun).</summary>
         public static HitData MediumAttack() => new()
         {
             Level = EHitLevel.Two,
@@ -120,6 +167,7 @@ namespace Systems.Combat.HitSystem
             ComboCounterIncrease = 1
         };
 
+        /// <summary>Returns a <see cref="HitData"/> pre-configured for a heavy attack (level 3, 50 damage, 25 hitstun).</summary>
         public static HitData HeavyAttack() => new()
         {
             Level = EHitLevel.Three,
@@ -138,15 +186,29 @@ namespace Systems.Combat.HitSystem
         };
     }
 
+    /// <summary>
+    /// Result of a resolved hitbox–hurtbox collision, bundling both combatants, the outcome,
+    /// the originating hit data, and world-space knockback vectors pre-computed by
+    /// <see cref="CombatManager"/>.
+    /// </summary>
     public struct HitResult
     {
+        /// <summary>The combatant whose hitbox triggered the collision.</summary>
         public CombatantBehaviour Perpetrator;
+
+        /// <summary>The combatant whose hurtbox was overlapped.</summary>
         public CombatantBehaviour Victim;
+
+        /// <summary>Whether the attack hit, was blocked, or was negated by armor.</summary>
         public EHitResolution Resolution;
+
+        /// <summary>The original hit data from the attacker's move script.</summary>
         public HitData HitData;
 
-        //These are pre-solved by the CombatManager and live in world-space.
+        /// <summary>World-space knockback applied to the victim, pre-computed by <see cref="CombatManager.ResolveKnockback"/>.</summary>
         public Vector2 VictimKnockback;
+
+        /// <summary>World-space recoil applied to the attacker, pre-computed by <see cref="CombatManager.ResolveKnockback"/>.</summary>
         public Vector2 PerpetratorKnockback;
     }
 
@@ -154,10 +216,18 @@ namespace Systems.Combat.HitSystem
     /// Disposable handle returned by <see cref="Hit"/>. Clears active hit data when
     /// the using block exits so stale data never leaks into the next pose.
     /// </summary>
+    /// <summary>
+    /// Disposable handle returned by the <c>Hit()</c> DSL method. Clears the active hit data
+    /// from the runner when the <c>using</c> block exits so stale data never leaks into the next pose.
+    /// </summary>
     public sealed class HitScope : IDisposable
     {
         private readonly MoveRunner _runner;
+
+        /// <summary>Creates a scope tied to <paramref name="runner"/>; call <see cref="Dispose"/> (via <c>using</c>) to clear hit data.</summary>
         internal HitScope(MoveRunner runner) => _runner = runner;
+
+        /// <summary>Clears the runner's active hit data.</summary>
         public void Dispose() => _runner.ClearHitData();
     }
 }

@@ -4,9 +4,15 @@ using UnityEngine;
 
 namespace Systems.Combat.Combatant.Data.Editor
 {
+    /// <summary>
+    /// Custom property drawer for fields tagged with <see cref="StatsConstrainedSelector"/>.
+    /// Renders a single dropdown line that opens a type-filtered menu compatible with the
+    /// sibling <c>StatsTemplate</c> field. Highlights mismatched assignments with a ⚠ prefix.
+    /// </summary>
     [CustomPropertyDrawer(typeof(StatsConstrainedSelector))]
     public sealed class StatsConstrainedSelectorDrawer : PropertyDrawer
     {
+        /// <summary>Draws the label and a dropdown button; shows an error box when the target field is not a <c>[SerializeReference]</c>.</summary>
         public override void OnGUI(
             Rect position, SerializedProperty property, GUIContent label)
         {
@@ -53,6 +59,7 @@ namespace Systems.Combat.Combatant.Data.Editor
             EditorGUI.EndProperty();
         }
 
+        /// <summary>Always returns single-line height; this drawer never expands children inline.</summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
             => EditorGUIUtility.singleLineHeight;
     }

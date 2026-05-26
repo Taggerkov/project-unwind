@@ -1,5 +1,6 @@
 namespace Systems.CPU
 {
+    /// <summary>Extension helpers for <see cref="EDefenceResponse"/> values.</summary>
     public static class DefenceResponseExtensions
     {
         /// <summary>

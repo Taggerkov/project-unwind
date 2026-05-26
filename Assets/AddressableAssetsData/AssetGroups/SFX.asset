@@ -330,6 +330,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4a91f3d7e852b16df30928c5461e0a7
+    m_Address: Audio/SFX/UI/SFX_MetalStoneHeavyStep.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f7b2e1d4c9a05e63b721a84df56c39e
+    m_Address: Audio/SFX/UI/SFX_MetalStoneLightClash.ogg
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 4e602854eb5abe04cab3ba7e9406b755, type: 2}
   m_SchemaSet:

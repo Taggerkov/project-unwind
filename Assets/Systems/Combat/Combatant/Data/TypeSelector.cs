@@ -10,8 +10,11 @@ namespace Systems.Combat.Combatant.Data
     [AttributeUsage(AttributeTargets.Field)]
     public class TypeSelector : PropertyAttribute
     {
+        /// <summary>When true, the drawer renders the selected type's child properties inline below the dropdown.</summary>
         public bool DrawChildren { get; }
 
+        /// <summary>Creates a <see cref="TypeSelector"/> attribute.</summary>
+        /// <param name="drawChildren">Whether to expand child properties inline. Defaults to true.</param>
         public TypeSelector(bool drawChildren = true)
         {
             DrawChildren = drawChildren;

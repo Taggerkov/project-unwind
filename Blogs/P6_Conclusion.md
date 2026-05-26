@@ -43,18 +43,19 @@ Project Unwind in motion:
 And a few of the tools and works-in-progress behind it:
 
 ### Audio Control Centre
-![The live audio visualiser running in Play Mode.](Resources/P6_audiocentre.png)
+![The live audio visualiser running in Play Mode.](Resources/P6_audioControl.png)
 ### Pose authoring
-![Capturing a combat pose in the editor.](Resources/P6_poseeditor.png)
+![Capturing a combat pose in the editor.](Resources/P6_poseEditor.png)
 ### Combat debug
-![Hitboxes and tick state visualised live.](Resources/P6_combatdebug.png)
+![Hitboxes and tick state visualised live.](Resources/P6_combatDebug.png)
 
 ## Conclusion
 
-I am leaving this with a prototype that plays, an engine I understand far better than I did in March, and a project I am
-not finished with. That last part is the one that matters.
+This project has tought me a lot about game development, and what aspects of development are most interesting for me.
+I have learned a lot about Unity, and probably most of it can be applied to other engines.  
+I would actually want to see this game finished...
 
 ---
 Author: Taggerkov  
-Date: 23/05/26  
+Update: 25/05/26  
 Source: [GitHub](https://github.com/Taggerkov/project-unwind)
