@@ -1,9 +1,9 @@
 const cacheName = "TotallySaneStudio-Project Unwind-0.1.4";
 const contentToCache = [
-    "Build/78d073282581829b8f221710ac41cf40.loader.js",
+    "Build/8db5deec927f2f2c2e9f0940e74c7ac6.loader.js",
     "Build/9e807047170d8b5ca800187c2aa27437.framework.js.unityweb",
-    "Build/6dd9a6db41804ce240cc54ba95d09b28.data.unityweb",
-    "Build/30c24dda1c3f534bea851726460da11c.wasm.unityweb",
+    "Build/75d0d5bb349c47c86df4b12fb732af84.data.unityweb",
+    "Build/8ffcc5bbdad413779dd04161be7cd428.wasm.unityweb",
     "TemplateData/style.css"
 
 ];
