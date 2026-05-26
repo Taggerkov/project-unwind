@@ -36,12 +36,6 @@ seen it. The signature mechanics are designed and waiting; they are the next thi
 
 ## Showcase
 
-Project Unwind in motion:
-
-[![Project Unwind demo](Resources/P6_demo.png)](VIDEO_URL)
-
-And a few of the tools and works-in-progress behind it:
-
 ### Audio Control Centre
 ![The live audio visualiser running in Play Mode.](Resources/P6_audioControl.png)
 ### Pose authoring

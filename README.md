@@ -9,7 +9,7 @@ All game logic is pure C# running on a fixed 60 Hz tick system; Unity handles re
 ## Links
 
 - **Play WebGL build:** [GitHub Pages](https://taggerkov.github.io/project-unwind/) (tested on Windows: Firefox / Edge)
-- **Demo video:** [YouTube](https://youtu.be/4-222222222)
+- **Demo video:** [YouTube](https://youtu.be/tcDMvHKQf80)
 
 ## Blog Posts
 
@@ -64,7 +64,11 @@ System.ComponentModel.Annotations, System.Threading.Channels.
 
 ## Third-Party Assets and Tutorials
 
-
+https://learn.unity.com/project/roll-a-ball
+https://youtu.be/1OwQflHq5kg?si=Gu1kbKsRFmfk6y_v
+https://youtu.be/6DcwHPxCE54?si=tUQlNNojFARFtJLO
+https://youtu.be/fqb9MfRqK9I?si=MTQGBoqNkfEE0r3Y
+https://youtu.be/hLArq9nmnyU?si=BA-ZuS_o4yptACIO
 
 ## Roll-a-Ball Demo
 
